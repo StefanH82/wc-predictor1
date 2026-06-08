@@ -159,7 +159,7 @@ const store = {
 };
 
 
-const ADMIN_PIN = "wc2026SH";
+const ADMIN_PIN = "wc2026admin";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -425,9 +425,9 @@ Use exact team names as given. Be precise with scores.`;
   return (
     <div style={{
       minHeight:"100vh",
-      background:"#07080f",
-      fontFamily:"'Palatino Linotype','Book Antiqua',Palatino,Georgia,serif",
-      color:"#c8d8e8",
+      background:"#282930",
+      fontFamily:"'Inter,system-ui,sans-serif",
+      color:"#e8f2fb",
       position:"relative",
       overflowX:"hidden"
     }}>
@@ -443,18 +443,18 @@ Use exact team names as given. Be precise with scores.`;
         )`
       }}/>
 
-      {/* Blue top accent */}
+      {/* Gold top accent */}
       <div style={{
         position:"fixed",top:0,left:0,right:0,height:2,zIndex:100,
-        background:"linear-gradient(90deg,transparent,#292562 70%,#6E67C5 50%,#ADAADF 70%,transparent)"
+        background:"linear-gradient(90deg,transparent,#1c76bc 30%,#292562 50%,#1c76bc 70%,transparent)"
       }}/>
 
       {/* ── HEADER ── */}
       <header style={{
         position:"sticky",top:0,zIndex:50,
-        background:"rgba(7,8,15,0.97)",
+        background:"rgba(40,41,48,0.97)",
         backdropFilter:"blur(20px)",
-        borderBottom:"1px solid rgba(201,162,39,0.12)",
+        borderBottom:"1px solid rgba(28,118,188,0.25)",
         padding:"0 20px"
       }}>
         <div style={{maxWidth:800,margin:"0 auto"}}>
@@ -466,9 +466,9 @@ Use exact team names as given. Be precise with scores.`;
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{
                 width:40,height:40,borderRadius:10,
-                background:"linear-gradient(135deg,#c9a227 0%,#6E67C5 50%,#292562 100%)",
+                background:"linear-gradient(135deg,#1c76bc 0%,#292562 100%)",
                 display:"flex",alignItems:"center",justifyContent:"center",
-                fontSize:20,boxShadow:"0 0 20px rgba(201,162,39,0.35),0 4px 12px rgba(0,0,0,0.5)"
+                fontSize:20,boxShadow:"0 0 20px rgba(28,118,188,0.4),0 4px 12px rgba(0,0,0,0.5)"
               }}>⚽</div>
               <div>
                 <div style={{
@@ -476,9 +476,9 @@ Use exact team names as given. Be precise with scores.`;
                   letterSpacing:0.5,lineHeight:1.1
                 }}>World Cup 2026</div>
                 <div style={{
-                  fontSize:9,letterSpacing:4,color:"#292562",
+                  fontSize:9,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
-                }}>PBD Predictor</div>
+                }}>Company Predictor</div>
               </div>
             </div>
 
@@ -495,18 +495,18 @@ Use exact team names as given. Be precise with scores.`;
               {userName && (
                 <div style={{
                   display:"flex",alignItems:"center",gap:7,
-                  background:"rgba(201,162,39,0.1)",
-                  border:"1px solid rgba(201,162,39,0.2)",
+                  background:"rgba(28,118,188,0.1)",
+                  border:"1px solid rgba(28,118,188,0.2)",
                   borderRadius:30,padding:"5px 12px 5px 6px"
                 }}>
                   <div style={{
                     width:26,height:26,borderRadius:"50%",
-                    background:"linear-gradient(135deg,#c9a227,#e8a010)",
+                    background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                     display:"flex",alignItems:"center",justifyContent:"center",
                     fontSize:9,fontWeight:800,color:"#000"
                   }}>{getInitials(userName)}</div>
-                  <span style={{fontSize:12,color:"#f5d060",fontWeight:600}}>{userName}</span>
-                  {submitted && <span style={{fontSize:9,color:"rgba(201,162,39,0.5)"}}>{totalPreds}</span>}
+                  <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
+                  {submitted && <span style={{fontSize:9,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
               )}
             </div>
@@ -523,8 +523,8 @@ Use exact team names as given. Be precise with scores.`;
                 padding:"10px 20px",background:"none",border:"none",
                 cursor:"pointer",fontFamily:"inherit",
                 fontSize:11,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",
-                color:tab===t.id?"#f5d060":"rgba(255,255,255,0.28)",
-                borderBottom:tab===t.id?"2px solid #c9a227":"2px solid transparent",
+                color:tab===t.id?"#a2ceec":"rgba(255,255,255,0.28)",
+                borderBottom:tab===t.id?"2px solid #1c76bc":"2px solid transparent",
                 marginBottom:-1,transition:"all 0.15s"
               }}>{t.label}</button>
             ))}
@@ -540,11 +540,11 @@ Use exact team names as given. Be precise with scores.`;
             // Name entry
             <div style={{
               maxWidth:380,margin:"70px auto",
-              background:"linear-gradient(135deg,rgba(201,162,39,0.06),rgba(255,255,255,0.02))",
-              border:"1px solid rgba(201,162,39,0.2)",
+              background:"linear-gradient(135deg,rgba(28,118,188,0.06),rgba(255,255,255,0.02))",
+              border:"1px solid rgba(28,118,188,0.2)",
               borderRadius:20,padding:"48px 32px",textAlign:"center"
             }}>
-              <div style={{fontSize:52,marginBottom:16,filter:"drop-shadow(0 4px 12px rgba(201,162,39,0.4))"}}>🏆</div>
+              <div style={{fontSize:52,marginBottom:16,filter:"drop-shadow(0 4px 12px rgba(28,118,188,0.4))"}}>🏆</div>
               <h2 style={{margin:"0 0 4px",fontSize:22,color:"#fff",fontWeight:700,letterSpacing:-0.3}}>
                 FIFA World Cup 2026
               </h2>
@@ -556,8 +556,8 @@ Use exact team names as given. Be precise with scores.`;
               </p>
 
               <div style={{
-                fontSize:10,color:"rgba(201,162,39,0.6)",
-                background:"rgba(201,162,39,0.08)",border:"1px solid rgba(201,162,39,0.15)",
+                fontSize:10,color:"rgba(28,118,188,0.6)",
+                background:"rgba(28,118,188,0.08)",border:"1px solid rgba(28,118,188,0.15)",
                 borderRadius:8,padding:"8px 12px",marginBottom:20,letterSpacing:0.3
               }}>
                 ⏱ Predictions lock 1 hour before each kick-off
@@ -577,10 +577,10 @@ Use exact team names as given. Be precise with scores.`;
                 />
                 <button onClick={handleSetName} style={{
                   padding:"11px 20px",
-                  background:"linear-gradient(135deg,#c9a227,#e8a010)",
+                  background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                   border:"none",borderRadius:9,color:"#000",
                   fontWeight:800,fontSize:12,cursor:"pointer",fontFamily:"inherit",
-                  boxShadow:"0 4px 14px rgba(201,162,39,0.35)"
+                  boxShadow:"0 4px 14px rgba(28,118,188,0.35)"
                 }}>Start</button>
               </div>
               {nameError && <p style={{color:"#f87171",fontSize:11,marginTop:8}}>{nameError}</p>}
@@ -617,9 +617,9 @@ Use exact team names as given. Be precise with scores.`;
                   return (
                     <button key={g} onClick={()=>setActiveGroup(g)} style={{
                       padding:"6px 10px",borderRadius:8,
-                      background:activeGroup===g?"rgba(201,162,39,0.18)":"transparent",
-                      border:activeGroup===g?"1px solid rgba(201,162,39,0.35)":"1px solid transparent",
-                      color:activeGroup===g?"#f5d060":done?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.25)",
+                      background:activeGroup===g?"rgba(28,118,188,0.18)":"transparent",
+                      border:activeGroup===g?"1px solid rgba(28,118,188,0.35)":"1px solid transparent",
+                      color:activeGroup===g?"#a2ceec":done?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.25)",
                       fontSize:11,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
                       display:"flex",alignItems:"center",gap:3
                     }}>
@@ -664,12 +664,12 @@ Use exact team names as given. Be precise with scores.`;
                           ? "rgba(255,255,255,0.025)"
                           : "rgba(255,200,0,0.03)"
                         : hasPred
-                          ? "rgba(201,162,39,0.05)"
+                          ? "rgba(28,118,188,0.05)"
                           : "rgba(255,255,255,0.02)",
                       border:`1px solid ${
                         locked && hasResult ? "rgba(255,255,255,0.06)"
                         : locked ? "rgba(251,191,36,0.15)"
-                        : hasPred ? "rgba(201,162,39,0.18)"
+                        : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
                       borderRadius:9,padding:"9px 12px",
                       display:"flex",alignItems:"center",gap:8,
@@ -703,7 +703,7 @@ Use exact team names as given. Be precise with scores.`;
                       {/* Home team */}
                       <span style={{
                         flex:1,fontSize:11,textAlign:"right",
-                        color: locked?"rgba(255,255,255,0.35)":"#c8d8e8",
+                        color: locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.home)}</span>
 
@@ -749,7 +749,7 @@ Use exact team names as given. Be precise with scores.`;
                       {/* Away team */}
                       <span style={{
                         flex:1,fontSize:11,
-                        color:locked?"rgba(255,255,255,0.35)":"#c8d8e8",
+                        color:locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.away)}</span>
 
@@ -779,12 +779,12 @@ Use exact team names as given. Be precise with scores.`;
               <div style={{marginTop:20,display:"flex",justifyContent:"center",alignItems:"center",gap:16,flexWrap:"wrap"}}>
                 <button onClick={submitPredictions} disabled={saving} style={{
                   padding:"13px 44px",
-                  background:saving?"rgba(201,162,39,0.25)":"linear-gradient(135deg,#c9a227,#e8a010)",
+                  background:saving?"rgba(28,118,188,0.25)":"linear-gradient(135deg,#1c76bc,#1c76bc)",
                   border:"none",borderRadius:50,
-                  color:saving?"rgba(0,0,0,0.4)":"#000",
+                  color:saving?"rgba(255,255,255,0.4)":"#fff",
                   fontWeight:800,fontSize:13,cursor:saving?"not-allowed":"pointer",
                   fontFamily:"inherit",letterSpacing:0.5,
-                  boxShadow:"0 4px 20px rgba(201,162,39,0.3)"
+                  boxShadow:"0 4px 20px rgba(28,118,188,0.3)"
                 }}>{saving?"Saving…":submitted?"Update Predictions":"Submit Predictions"}</button>
                 <span style={{fontSize:11,color:"rgba(255,255,255,0.2)"}}>
                   {totalPreds} / 104 filled
@@ -815,7 +815,7 @@ Use exact team names as given. Be precise with scores.`;
               background:"rgba(255,255,255,0.025)",borderRadius:8,flexWrap:"wrap"
             }}>
               {[
-                {pts:"+3",label:"Exact score",c:"#c9a227"},
+                {pts:"+3",label:"Exact score",c:"#1c76bc"},
                 {pts:"+1",label:"Correct result",c:"#60a5fa"},
                 {pts:"312",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
@@ -841,8 +841,8 @@ Use exact team names as given. Be precise with scores.`;
                   return (
                     <div key={entry.name} style={{
                       position:"relative",overflow:"hidden",
-                      background:isMe?"rgba(201,162,39,0.08)":"rgba(255,255,255,0.025)",
-                      border:isMe?"1px solid rgba(201,162,39,0.28)":"1px solid rgba(255,255,255,0.055)",
+                      background:isMe?"rgba(28,118,188,0.08)":"rgba(255,255,255,0.025)",
+                      border:isMe?"1px solid rgba(28,118,188,0.28)":"1px solid rgba(255,255,255,0.055)",
                       borderRadius:10,padding:"12px 16px"
                     }}>
                       {/* Progress bar bg */}
@@ -850,8 +850,8 @@ Use exact team names as given. Be precise with scores.`;
                         position:"absolute",left:0,top:0,bottom:0,
                         width:`${pct}%`,
                         background:isMe
-                          ? "rgba(201,162,39,0.07)"
-                          : i===0 ? "rgba(201,162,39,0.04)"
+                          ? "rgba(28,118,188,0.07)"
+                          : i===0 ? "rgba(28,118,188,0.04)"
                           : "rgba(255,255,255,0.015)",
                         transition:"width 0.6s ease"
                       }}/>
@@ -862,12 +862,12 @@ Use exact team names as given. Be precise with scores.`;
                         }}>{i<3?medals[i]:i+1}</span>
                         <div style={{
                           width:30,height:30,borderRadius:"50%",flexShrink:0,
-                          background:isMe?"linear-gradient(135deg,#c9a227,#e8a010)":"rgba(255,255,255,0.07)",
+                          background:isMe?"linear-gradient(135deg,#1c76bc,#1c76bc)":"rgba(255,255,255,0.07)",
                           display:"flex",alignItems:"center",justifyContent:"center",
                           fontSize:10,fontWeight:800,color:isMe?"#000":"rgba(255,255,255,0.35)"
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
-                          <div style={{fontSize:13,color:isMe?"#f5d060":"#c8d8e8",fontWeight:isMe?700:400}}>
+                          <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
                             {entry.name} {isMe&&<span style={{fontSize:9,opacity:0.4}}>(you)</span>}
                           </div>
                           {entry.count&&(
@@ -879,7 +879,7 @@ Use exact team names as given. Be precise with scores.`;
                         <div>
                           <span style={{
                             fontSize:22,fontWeight:700,
-                            color:i===0?"#c9a227":i<3?"#e2e8f0":"rgba(255,255,255,0.35)"
+                            color:i===0?"#a2ceec":i<3?"#e8f2fb":"rgba(255,255,255,0.35)"
                           }}>{entry.points}</span>
                           <span style={{fontSize:9,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
                         </div>
@@ -928,12 +928,12 @@ Use exact team names as given. Be precise with scores.`;
                   else showToast("Wrong PIN","error");
                 }} style={{
                   padding:"10px 28px",
-                  background:"linear-gradient(135deg,#c9a227,#e8a010)",
+                  background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                   border:"none",borderRadius:8,
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.15)",marginTop:14}}>
-                  Default PIN: xxxxxx
+                  Default PIN: wc2026admin
                 </p>
               </div>
             ) : (
@@ -955,13 +955,13 @@ Use exact team names as given. Be precise with scores.`;
 
                 {/* ── AI FETCH BUTTON ── */}
                 <div style={{
-                  background:"rgba(201,162,39,0.06)",
-                  border:"1px solid rgba(201,162,39,0.18)",
+                  background:"rgba(28,118,188,0.06)",
+                  border:"1px solid rgba(28,118,188,0.18)",
                   borderRadius:14,padding:"20px",marginBottom:20
                 }}>
                   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
                     <div>
-                      <div style={{fontSize:13,fontWeight:700,color:"#f5d060",marginBottom:4}}>
+                      <div style={{fontSize:13,fontWeight:700,color:"#a2ceec",marginBottom:4}}>
                         🤖 Auto-Fetch Results
                       </div>
                       <div style={{fontSize:11,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>
@@ -980,14 +980,14 @@ Use exact team names as given. Be precise with scores.`;
                       style={{
                         padding:"12px 24px",flexShrink:0,
                         background:fetching
-                          ? "rgba(201,162,39,0.2)"
-                          : "linear-gradient(135deg,#c9a227,#e8a010)",
+                          ? "rgba(28,118,188,0.2)"
+                          : "linear-gradient(135deg,#1c76bc,#1c76bc)",
                         border:"none",borderRadius:10,
                         color:fetching?"rgba(0,0,0,0.4)":"#000",
                         fontWeight:800,fontSize:13,
                         cursor:fetching?"not-allowed":"pointer",
                         fontFamily:"inherit",
-                        boxShadow:fetching?"none":"0 4px 16px rgba(201,162,39,0.3)",
+                        boxShadow:fetching?"none":"0 4px 16px rgba(28,118,188,0.3)",
                         whiteSpace:"nowrap"
                       }}
                     >
@@ -1009,7 +1009,7 @@ Use exact team names as given. Be precise with scores.`;
                         <div key={i} style={{
                           color: line.startsWith("✅")?"#4ade80"
                             :line.startsWith("❌")||line.startsWith("⚠️")?"#f87171"
-                            :line.startsWith("🏆")?"#c9a227"
+                            :line.startsWith("🏆")?"#a2ceec"
                             :"rgba(255,255,255,0.45)"
                         }}>{line}</div>
                       ))}
@@ -1046,7 +1046,7 @@ Use exact team names as given. Be precise with scores.`;
                             fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.4)"
                           }}>{getInitials(entry.name)}</div>
                           <div style={{flex:1}}>
-                            <div style={{fontSize:12,color:"#c8d8e8"}}>{entry.name}</div>
+                            <div style={{fontSize:12,color:"#e8f2fb"}}>{entry.name}</div>
                             <div style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
                               {entry.points} pts · {entry.count||0} predictions
                             </div>
@@ -1115,7 +1115,7 @@ Use exact team names as given. Be precise with scores.`;
                             <div style={{fontSize:8,color:"#4ade80",marginTop:2}}>✓ saved</div>
                           )}
                         </div>
-                        <span style={{flex:1,fontSize:11,textAlign:"right",color:"#c8d8e8"}}>{tf(match.home)}</span>
+                        <span style={{flex:1,fontSize:11,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
                         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                           <input type="number" min={0} max={99}
                             value={r.home}
@@ -1151,7 +1151,7 @@ Use exact team names as given. Be precise with scores.`;
                             }}
                           />
                         </div>
-                        <span style={{flex:1,fontSize:11,color:"#c8d8e8"}}>{tf(match.away)}</span>
+                        <span style={{flex:1,fontSize:11,color:"#e8f2fb"}}>{tf(match.away)}</span>
                       </div>
                     );
                   })}
