@@ -660,7 +660,7 @@ Use exact team names as given. Be precise with scores.`;
         left:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:400,
+        width:300,
         height:500,
         zIndex:5,
         pointerEvents:"none",
@@ -670,7 +670,7 @@ Use exact team names as given. Be precise with scores.`;
         <img
           src="/Left.jpg"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
         />
       </div>
 
