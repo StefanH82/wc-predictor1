@@ -165,18 +165,36 @@ const db = {
     return text ? JSON.parse(text) : null;
   },
 
-  // Get or create user, return user id
-  async upsertUser(name) {
-    // Try insert, ignore conflict
-    await db.query("users", {
+  // Register new user via Supabase RPC
+  async register(name, password) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/register_user`, {
       method: "POST",
-      prefer: "return=minimal",
-      headers: { "Prefer": "return=minimal,resolution=ignore-duplicates" },
-      body: { name }
+      headers: {
+        "apikey": SUPABASE_ANON,
+        "Authorization": `Bearer ${SUPABASE_ANON}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ p_name: name, p_password: password })
     });
-    // Fetch the user
-    const rows = await db.query(`users?name=eq.${encodeURIComponent(name)}&select=id,name`);
-    return rows?.[0] || null;
+    if (!res.ok) throw new Error(await res.text());
+    const rows = await res.json();
+    return rows?.[0] || null; // null = name already taken
+  },
+
+  // Login existing user via Supabase RPC
+  async login(name, password) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/login_user`, {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_ANON,
+        "Authorization": `Bearer ${SUPABASE_ANON}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ p_name: name, p_password: password })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const rows = await res.json();
+    return rows?.[0] || null; // null = wrong credentials
   },
 
   // Load all predictions for a user
@@ -237,17 +255,21 @@ const db = {
 };
 
 
-const ADMIN_PIN = "wc2026SH";
+const ADMIN_PIN = "wc2026admin";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
   const [tab, setTab] = useState("predict");
 
-  // User
+  // Auth
   const [userName, setUserName] = useState("");
   const [userId, setUserId] = useState(null);
+  const [authMode, setAuthMode] = useState("login"); // "login" | "register"
   const [nameInput, setNameInput] = useState("");
-  const [nameError, setNameError] = useState("");
+  const [passwordInput, setPasswordInput] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
 
   // Predictions & results
   const [predictions, setPredictions] = useState({});
@@ -299,21 +321,49 @@ export default function App() {
     } catch(e) { console.error("loadResults failed", e); }
   }
 
-  async function loadMyPredictions(name) {
+  async function loadMyPredictions(uid) {
     try {
-      const user = await db.upsertUser(name);
-      if (!user) return;
-      setUserId(user.id);
-      const preds = await db.loadPredictions(user.id);
+      const preds = await db.loadPredictions(uid);
       if (Object.keys(preds).length > 0) { setPredictions(preds); setSubmitted(true); }
     } catch(e) { console.error("loadMyPredictions failed", e); }
   }
 
-  async function handleSetName() {
-    const n = nameInput.trim();
-    if (!n || n.length < 2) { setNameError("Enter at least 2 characters"); return; }
-    setUserName(n); setNameError("");
-    await loadMyPredictions(n);
+  async function handleLogin() {
+    const name = nameInput.trim();
+    const pass = passwordInput;
+    if (!name) { setAuthError("Enter your name"); return; }
+    if (!pass) { setAuthError("Enter your password"); return; }
+    setAuthLoading(true); setAuthError("");
+    try {
+      const user = await db.login(name, pass);
+      if (!user) { setAuthError("Incorrect name or password"); setAuthLoading(false); return; }
+      setUserName(user.name); setUserId(user.id);
+      await loadMyPredictions(user.id);
+    } catch(e) { setAuthError("Login failed — please try again"); }
+    setAuthLoading(false);
+  }
+
+  async function handleRegister() {
+    const name = nameInput.trim();
+    const pass = passwordInput;
+    if (!name || name.length < 2) { setAuthError("Name must be at least 2 characters"); return; }
+    if (!pass || pass.length < 6) { setAuthError("Password must be at least 6 characters"); return; }
+    if (pass !== confirmPassword) { setAuthError("Passwords do not match"); return; }
+    setAuthLoading(true); setAuthError("");
+    try {
+      const user = await db.register(name, pass);
+      if (!user) { setAuthError("That name is already taken — choose another or log in"); setAuthLoading(false); return; }
+      setUserName(user.name); setUserId(user.id);
+      showToast(`Welcome, ${user.name}! Account created.`);
+    } catch(e) { setAuthError("Registration failed — please try again"); }
+    setAuthLoading(false);
+  }
+
+  function handleLogout() {
+    setUserName(""); setUserId(null);
+    setPredictions({}); setSubmitted(false);
+    setNameInput(""); setPasswordInput(""); setConfirmPassword("");
+    setAuthError(""); setAuthMode("login");
   }
 
   function setPred(id, side, val) {
@@ -543,7 +593,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
-                }}>PBD Predictor</div>
+                }}>Company Predictor</div>
               </div>
             </div>
 
@@ -558,6 +608,7 @@ Use exact team names as given. Be precise with scores.`;
                 }}>{totalResults} results in</div>
               )}
               {userName && (
+                <>
                 <div style={{
                   display:"flex",alignItems:"center",gap:7,
                   background:"rgba(28,118,188,0.1)",
@@ -573,6 +624,14 @@ Use exact team names as given. Be precise with scores.`;
                   <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
                   {submitted && <span style={{fontSize:9,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
+                <button onClick={handleLogout} style={{
+                  background:"rgba(255,255,255,0.05)",
+                  border:"1px solid rgba(255,255,255,0.08)",
+                  borderRadius:20,padding:"5px 10px",
+                  color:"rgba(255,255,255,0.3)",fontSize:10,
+                  cursor:"pointer",fontFamily:"inherit",marginLeft:4
+                }}>Log out</button>
+                </>
               )}
             </div>
           </div>
@@ -602,53 +661,134 @@ Use exact team names as given. Be precise with scores.`;
         {/* ═══ PREDICT TAB ═══ */}
         {tab==="predict" && (
           !userName ? (
-            // Name entry
+            // ── AUTH SCREEN ──
             <div style={{
-              maxWidth:380,margin:"70px auto",
-              background:"linear-gradient(135deg,rgba(28,118,188,0.06),rgba(255,255,255,0.02))",
+              maxWidth:400,margin:"60px auto",
+              background:"rgba(28,118,188,0.05)",
               border:"1px solid rgba(28,118,188,0.2)",
-              borderRadius:20,padding:"48px 32px",textAlign:"center"
+              borderRadius:20,padding:"44px 32px"
             }}>
-              <div style={{fontSize:52,marginBottom:16,filter:"drop-shadow(0 4px 12px rgba(28,118,188,0.4))"}}>🏆</div>
-              <h2 style={{margin:"0 0 4px",fontSize:22,color:"#fff",fontWeight:700,letterSpacing:-0.3}}>
-                FIFA World Cup 2026
-              </h2>
-              <p style={{margin:"0 0 4px",fontSize:12,color:"rgba(255,255,255,0.35)"}}>
-                USA · Canada · Mexico · Jun 11 – Jul 19
-              </p>
-              <p style={{margin:"0 0 28px",fontSize:11,color:"rgba(255,255,255,0.2)"}}>
-                48 teams · 104 matches · 12 groups
-              </p>
-
-              <div style={{
-                fontSize:10,color:"rgba(28,118,188,0.6)",
-                background:"rgba(28,118,188,0.08)",border:"1px solid rgba(28,118,188,0.15)",
-                borderRadius:8,padding:"8px 12px",marginBottom:20,letterSpacing:0.3
-              }}>
-                ⏱ Predictions lock 1 hour before each kick-off
+              {/* Logo */}
+              <div style={{textAlign:"center",marginBottom:28}}>
+                <div style={{fontSize:48,marginBottom:12}}>🏆</div>
+                <h2 style={{margin:"0 0 4px",fontSize:20,color:"#fff",fontWeight:700}}>
+                  FIFA World Cup 2026
+                </h2>
+                <p style={{margin:0,fontSize:11,color:"rgba(255,255,255,0.3)"}}>
+                  USA · Canada · Mexico · Jun 11 – Jul 19
+                </p>
               </div>
 
-              <div style={{display:"flex",gap:8}}>
-                <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
-                  onKeyDown={e=>e.key==="Enter"&&handleSetName()}
-                  placeholder="Enter your name & surname"
+              {/* Login / Register toggle */}
+              <div style={{
+                display:"flex",background:"rgba(255,255,255,0.05)",
+                borderRadius:10,padding:4,marginBottom:24
+              }}>
+                {["login","register"].map(mode => (
+                  <button key={mode} onClick={()=>{setAuthMode(mode);setAuthError("");}}
+                    style={{
+                      flex:1,padding:"8px 0",border:"none",borderRadius:8,
+                      background:authMode===mode?"rgba(28,118,188,0.5)":"transparent",
+                      color:authMode===mode?"#fff":"rgba(255,255,255,0.35)",
+                      fontWeight:authMode===mode?700:400,
+                      fontSize:12,cursor:"pointer",fontFamily:"inherit",
+                      letterSpacing:0.5,textTransform:"capitalize",
+                      transition:"all 0.15s"
+                    }}>{mode === "login" ? "Log In" : "Register"}</button>
+                ))}
+              </div>
+
+              {/* Fields */}
+              <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                <input
+                  value={nameInput}
+                  onChange={e=>{setNameInput(e.target.value);setAuthError("");}}
+                  onKeyDown={e=>e.key==="Enter"&&(authMode==="login"?handleLogin():handleRegister())}
+                  placeholder="Your name"
                   style={{
-                    flex:1,padding:"11px 14px",
+                    padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
                     border:"1px solid rgba(255,255,255,0.13)",
                     borderRadius:9,color:"#fff",fontSize:13,
                     fontFamily:"inherit",outline:"none"
                   }}
                 />
-                <button onClick={handleSetName} style={{
-                  padding:"11px 20px",
-                  background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
-                  border:"none",borderRadius:9,color:"#000",
-                  fontWeight:800,fontSize:12,cursor:"pointer",fontFamily:"inherit",
-                  boxShadow:"0 4px 14px rgba(28,118,188,0.35)"
-                }}>Start</button>
+                <input
+                  type="password"
+                  value={passwordInput}
+                  onChange={e=>{setPasswordInput(e.target.value);setAuthError("");}}
+                  onKeyDown={e=>e.key==="Enter"&&(authMode==="login"?handleLogin():handleRegister())}
+                  placeholder={authMode==="register"?"Create a password (min 6 chars)":"Password"}
+                  style={{
+                    padding:"11px 14px",
+                    background:"rgba(255,255,255,0.07)",
+                    border:"1px solid rgba(255,255,255,0.13)",
+                    borderRadius:9,color:"#fff",fontSize:13,
+                    fontFamily:"inherit",outline:"none"
+                  }}
+                />
+                {authMode==="register" && (
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={e=>{setConfirmPassword(e.target.value);setAuthError("");}}
+                    onKeyDown={e=>e.key==="Enter"&&handleRegister()}
+                    placeholder="Confirm password"
+                    style={{
+                      padding:"11px 14px",
+                      background:"rgba(255,255,255,0.07)",
+                      border:"1px solid rgba(255,255,255,0.13)",
+                      borderRadius:9,color:"#fff",fontSize:13,
+                      fontFamily:"inherit",outline:"none"
+                    }}
+                  />
+                )}
               </div>
-              {nameError && <p style={{color:"#f87171",fontSize:11,marginTop:8}}>{nameError}</p>}
+
+              {/* Error */}
+              {authError && (
+                <div style={{
+                  marginTop:12,padding:"9px 12px",
+                  background:"rgba(248,113,113,0.1)",
+                  border:"1px solid rgba(248,113,113,0.25)",
+                  borderRadius:7,fontSize:12,color:"#f87171"
+                }}>{authError}</div>
+              )}
+
+              {/* Submit button */}
+              <button
+                onClick={authMode==="login"?handleLogin:handleRegister}
+                disabled={authLoading}
+                style={{
+                  width:"100%",marginTop:16,padding:"12px",
+                  background:authLoading?"rgba(28,118,188,0.3)":"linear-gradient(135deg,#1c76bc,#292562)",
+                  border:"none",borderRadius:9,
+                  color:authLoading?"rgba(255,255,255,0.4)":"#fff",
+                  fontWeight:700,fontSize:13,cursor:authLoading?"not-allowed":"pointer",
+                  fontFamily:"inherit",letterSpacing:0.3,
+                  boxShadow:"0 4px 14px rgba(28,118,188,0.3)"
+                }}
+              >
+                {authLoading
+                  ? (authMode==="login"?"Logging in…":"Creating account…")
+                  : (authMode==="login"?"Log In":"Create Account")}
+              </button>
+
+              {/* Switch mode hint */}
+              <p style={{textAlign:"center",marginTop:16,fontSize:11,color:"rgba(255,255,255,0.2)"}}>
+                {authMode==="login"
+                  ? <>No account? <span onClick={()=>{setAuthMode("register");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Register here</span></>
+                  : <>Already registered? <span onClick={()=>{setAuthMode("login");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Log in</span></>
+                }
+              </p>
+
+              <div style={{
+                marginTop:20,padding:"8px 12px",
+                background:"rgba(28,118,188,0.06)",border:"1px solid rgba(28,118,188,0.12)",
+                borderRadius:7,fontSize:10,color:"rgba(255,255,255,0.25)",textAlign:"center"
+              }}>
+                ⏱ Predictions lock 1 hour before each kick-off
+              </div>
             </div>
           ) : (
             <>
@@ -998,7 +1138,7 @@ Use exact team names as given. Be precise with scores.`;
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.15)",marginTop:14}}>
-                  Default PIN: xxxxx
+                  Default PIN: wc2026admin
                 </p>
               </div>
             ) : (
