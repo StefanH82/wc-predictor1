@@ -443,10 +443,10 @@ Use exact team names as given. Be precise with scores.`;
         )`
       }}/>
 
-      {/* Gold top accent */}
+      {/* Blue top accent */}
       <div style={{
         position:"fixed",top:0,left:0,right:0,height:2,zIndex:100,
-        background:"linear-gradient(90deg,transparent,#292562 30%,#6E67C5 50%,#ADAADF 70%,transparent)"
+        background:"linear-gradient(90deg,transparent,#292562 70%,#6E67C5 50%,#ADAADF 70%,transparent)"
       }}/>
 
       {/* ── HEADER ── */}
@@ -466,7 +466,7 @@ Use exact team names as given. Be precise with scores.`;
             <div style={{display:"flex",alignItems:"center",gap:12}}>
               <div style={{
                 width:40,height:40,borderRadius:10,
-                background:"linear-gradient(135deg,#c9a227 0%,#f5d060 50%,#c9a227 100%)",
+                background:"linear-gradient(135deg,#c9a227 0%,#6E67C5 50%,#292562 100%)",
                 display:"flex",alignItems:"center",justifyContent:"center",
                 fontSize:20,boxShadow:"0 0 20px rgba(201,162,39,0.35),0 4px 12px rgba(0,0,0,0.5)"
               }}>⚽</div>
@@ -476,7 +476,7 @@ Use exact team names as given. Be precise with scores.`;
                   letterSpacing:0.5,lineHeight:1.1
                 }}>World Cup 2026</div>
                 <div style={{
-                  fontSize:9,letterSpacing:4,color:"#c9a227",
+                  fontSize:9,letterSpacing:4,color:"#292562",
                   textTransform:"uppercase",marginTop:1
                 }}>PBD Predictor</div>
               </div>
