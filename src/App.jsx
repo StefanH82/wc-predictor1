@@ -680,7 +680,7 @@ Use exact team names as given. Be precise with scores.`;
         right:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:200,
+        width:300,
         height:500,
         zIndex:5,
         pointerEvents:"none",
@@ -688,9 +688,9 @@ Use exact team names as given. Be precise with scores.`;
       }}>
         {/* Replace the src below with your image URL — recommended size: 200 x 500 px */}
         <img
-          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
+          src="/Right.jpg"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
         />
       </div>
 
