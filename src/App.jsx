@@ -654,6 +654,46 @@ Use exact team names as given. Be precise with scores.`;
       position:"relative",
       overflowX:"hidden"
     }}>
+      {/* ── LEFT IMAGE HOLDER ── */}
+      <div style={{
+        position:"fixed",
+        left:0,
+        top:"50%",
+        transform:"translateY(-50%)",
+        width:200,
+        height:500,
+        zIndex:5,
+        pointerEvents:"none",
+        overflow:"hidden"
+      }}>
+        {/* Replace the src below with your image URL — recommended size: 200 x 500 px */}
+        <img
+          src="https://placehold.co/200x500/1c76bc/ffffff?text=200+x+500"
+          alt="Left panel"
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+        />
+      </div>
+
+      {/* ── RIGHT IMAGE HOLDER ── */}
+      <div style={{
+        position:"fixed",
+        right:0,
+        top:"50%",
+        transform:"translateY(-50%)",
+        width:200,
+        height:500,
+        zIndex:5,
+        pointerEvents:"none",
+        overflow:"hidden"
+      }}>
+        {/* Replace the src below with your image URL — recommended size: 200 x 500 px */}
+        <img
+          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
+          alt="Right panel"
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+        />
+      </div>
+
       {/* Diagonal pitch lines */}
       <div style={{
         position:"fixed",inset:0,zIndex:0,pointerEvents:"none",
