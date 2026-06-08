@@ -19,11 +19,35 @@ const TEAM_FLAGS = {
 
 const tf = (t) => `${TEAM_FLAGS[t]||"🏳️"} ${t}`;
 
-// ISO date string → "Jun 11" label
+// ─── SAST DISPLAY HELPERS (UTC+2, South Africa Standard Time) ────────────────
+const SAST_OFFSET = 2 * 60; // minutes ahead of UTC
+
+function toSAST(iso) {
+  if (!iso) return null;
+  const d = new Date(iso);
+  // shift by +2 hours
+  return new Date(d.getTime() + SAST_OFFSET * 60 * 1000);
+}
+
+// "Jun 11" in SAST
 function fmtDate(iso) {
   if (!iso) return "";
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-GB",{month:"short",day:"numeric"});
+  return toSAST(iso).toLocaleDateString("en-GB",{month:"short",day:"numeric"});
+}
+
+// "21:00 SAST"
+function fmtTime(iso) {
+  if (!iso) return "";
+  return toSAST(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}) + " SAST";
+}
+
+// "Jun 11 · 21:00 SAST"
+function fmtDateTime(iso) {
+  if (!iso) return "";
+  const d = toSAST(iso);
+  const date = d.toLocaleDateString("en-GB",{month:"short",day:"numeric"});
+  const time = d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  return `${date} · ${time} SAST`;
 }
 
 // Returns true if current time is at least 1 hour AFTER the match kickoff (predictions closed)
@@ -47,59 +71,93 @@ function timeUntilDeadline(kickoffISO) {
   return `${m}m left`;
 }
 
-// Group stage: each pair plays once
-function buildGroupMatches(group, teams, dates) {
-  const pairs = [];
-  let dateIdx = 0;
-  for (let i = 0; i < teams.length; i++)
-    for (let j = i+1; j < teams.length; j++) {
-      pairs.push({
-        id: `${group}${pairs.length+1}`,
-        group, stage: `Group ${group}`,
-        home: teams[i], away: teams[j],
-        kickoff: dates[dateIdx++] || null
-      });
-    }
-  return pairs;
-}
-
+// ─── GROUP STAGE MATCHES — verified from official FIFA/ESPN/SI schedule ───────
+// All times in UTC (ET + 4 hours)
 const GROUP_MATCHES = [
-  ...buildGroupMatches("A",["Mexico","South Africa","South Korea","Czechia"],
-    ["2026-06-11T19:00:00Z","2026-06-18T16:00:00Z","2026-06-18T21:00:00Z",
-     "2026-06-11T02:00:00Z","2026-06-24T01:00:00Z","2026-06-24T01:00:00Z"]),
-  ...buildGroupMatches("B",["Canada","Bosnia & Herzegovina","Qatar","Switzerland"],
-    ["2026-06-12T19:00:00Z","2026-06-18T19:00:00Z","2026-06-18T22:00:00Z",
-     "2026-06-13T19:00:00Z","2026-06-24T19:00:00Z","2026-06-24T19:00:00Z"]),
-  ...buildGroupMatches("C",["Brazil","Morocco","Scotland","Haiti"],
-    ["2026-06-13T22:00:00Z","2026-06-19T22:00:00Z","2026-06-19T01:00:00Z",
-     "2026-06-13T01:00:00Z","2026-06-24T22:00:00Z","2026-06-24T22:00:00Z"]),
-  ...buildGroupMatches("D",["USA","Paraguay","Australia","Türkiye"],
-    ["2026-06-12T01:00:00Z","2026-06-19T19:00:00Z","2026-06-13T08:00:00Z",
-     "2026-06-19T06:00:00Z","2026-06-25T02:00:00Z","2026-06-25T02:00:00Z"]),
-  ...buildGroupMatches("E",["Germany","Ecuador","Ivory Coast","Curaçao"],
-    ["2026-06-14T19:00:00Z","2026-06-20T21:00:00Z","2026-06-14T23:00:00Z",
-     "2026-06-20T01:00:00Z","2026-06-25T21:00:00Z","2026-06-25T21:00:00Z"]),
-  ...buildGroupMatches("F",["Netherlands","Japan","Tunisia","Ukraine"],
-    ["2026-06-14T22:00:00Z","2026-06-20T19:00:00Z","2026-06-14T02:00:00Z",
-     "2026-06-20T06:00:00Z","2026-06-25T01:00:00Z","2026-06-25T01:00:00Z"]),
-  ...buildGroupMatches("G",["Belgium","Iran","Egypt","New Zealand"],
-    ["2026-06-15T19:00:00Z","2026-06-21T22:00:00Z","2026-06-15T01:00:00Z",
-     "2026-06-21T01:00:00Z","2026-06-26T02:00:00Z","2026-06-26T02:00:00Z"]),
-  ...buildGroupMatches("H",["Spain","Uruguay","Saudi Arabia","Cape Verde"],
-    ["2026-06-15T17:00:00Z","2026-06-21T17:00:00Z","2026-06-15T23:00:00Z",
-     "2026-06-21T23:00:00Z","2026-06-26T02:00:00Z","2026-06-26T02:00:00Z"]),
-  ...buildGroupMatches("I",["France","Senegal","Norway","Iraq"],
-    ["2026-06-16T20:00:00Z","2026-06-22T22:00:00Z","2026-06-16T23:00:00Z",
-     "2026-06-22T01:00:00Z","2026-06-26T20:00:00Z","2026-06-26T20:00:00Z"]),
-  ...buildGroupMatches("J",["Argentina","Austria","Algeria","Jordan"],
-    ["2026-06-16T01:00:00Z","2026-06-22T19:00:00Z","2026-06-16T08:00:00Z",
-     "2026-06-22T06:00:00Z","2026-06-27T02:00:00Z","2026-06-27T02:00:00Z"]),
-  ...buildGroupMatches("K",["Portugal","Colombia","Uzbekistan","DR Congo"],
-    ["2026-06-17T19:00:00Z","2026-06-23T19:00:00Z","2026-06-17T01:00:00Z",
-     "2026-06-23T01:00:00Z","2026-06-27T22:30:00Z","2026-06-27T22:30:00Z"]),
-  ...buildGroupMatches("L",["England","Croatia","Panama","Ghana"],
-    ["2026-06-17T22:00:00Z","2026-06-23T21:00:00Z","2026-06-17T00:00:00Z",
-     "2026-06-23T00:00:00Z","2026-06-27T22:00:00Z","2026-06-27T22:00:00Z"]),
+  // GROUP A
+  {id:"A1",group:"A",stage:"Group A",home:"Mexico",away:"South Africa",kickoff:"2026-06-11T19:00:00Z",venue:"Estadio Azteca"},
+  {id:"A2",group:"A",stage:"Group A",home:"South Korea",away:"Czechia",kickoff:"2026-06-12T02:00:00Z",venue:"Estadio Akron"},
+  {id:"A3",group:"A",stage:"Group A",home:"Czechia",away:"South Africa",kickoff:"2026-06-18T16:00:00Z",venue:"Mercedes-Benz Stadium"},
+  {id:"A4",group:"A",stage:"Group A",home:"Mexico",away:"South Korea",kickoff:"2026-06-19T01:00:00Z",venue:"Estadio Akron"},
+  {id:"A5",group:"A",stage:"Group A",home:"Czechia",away:"Mexico",kickoff:"2026-06-25T01:00:00Z",venue:"Estadio Azteca"},
+  {id:"A6",group:"A",stage:"Group A",home:"South Africa",away:"South Korea",kickoff:"2026-06-25T01:00:00Z",venue:"Estadio BBVA"},
+  // GROUP B
+  {id:"B1",group:"B",stage:"Group B",home:"Canada",away:"Bosnia & Herzegovina",kickoff:"2026-06-12T19:00:00Z",venue:"BMO Field"},
+  {id:"B2",group:"B",stage:"Group B",home:"Qatar",away:"Switzerland",kickoff:"2026-06-13T19:00:00Z",venue:"Levi's Stadium"},
+  {id:"B3",group:"B",stage:"Group B",home:"Switzerland",away:"Bosnia & Herzegovina",kickoff:"2026-06-18T19:00:00Z",venue:"SoFi Stadium"},
+  {id:"B4",group:"B",stage:"Group B",home:"Canada",away:"Qatar",kickoff:"2026-06-18T22:00:00Z",venue:"BC Place"},
+  {id:"B5",group:"B",stage:"Group B",home:"Switzerland",away:"Canada",kickoff:"2026-06-24T19:00:00Z",venue:"BC Place"},
+  {id:"B6",group:"B",stage:"Group B",home:"Bosnia & Herzegovina",away:"Qatar",kickoff:"2026-06-24T19:00:00Z",venue:"Lumen Field"},
+  // GROUP C
+  {id:"C1",group:"C",stage:"Group C",home:"Brazil",away:"Morocco",kickoff:"2026-06-13T22:00:00Z",venue:"MetLife Stadium"},
+  {id:"C2",group:"C",stage:"Group C",home:"Haiti",away:"Scotland",kickoff:"2026-06-14T01:00:00Z",venue:"Gillette Stadium"},
+  {id:"C3",group:"C",stage:"Group C",home:"Scotland",away:"Morocco",kickoff:"2026-06-19T22:00:00Z",venue:"Gillette Stadium"},
+  {id:"C4",group:"C",stage:"Group C",home:"Brazil",away:"Haiti",kickoff:"2026-06-20T01:00:00Z",venue:"Lincoln Financial Field"},
+  {id:"C5",group:"C",stage:"Group C",home:"Scotland",away:"Brazil",kickoff:"2026-06-24T22:00:00Z",venue:"Hard Rock Stadium"},
+  {id:"C6",group:"C",stage:"Group C",home:"Morocco",away:"Haiti",kickoff:"2026-06-24T22:00:00Z",venue:"Mercedes-Benz Stadium"},
+  // GROUP D
+  {id:"D1",group:"D",stage:"Group D",home:"USA",away:"Paraguay",kickoff:"2026-06-13T01:00:00Z",venue:"SoFi Stadium"},
+  {id:"D2",group:"D",stage:"Group D",home:"Australia",away:"Türkiye",kickoff:"2026-06-13T04:00:00Z",venue:"BC Place"},
+  {id:"D3",group:"D",stage:"Group D",home:"Türkiye",away:"Paraguay",kickoff:"2026-06-19T04:00:00Z",venue:"Levi's Stadium"},
+  {id:"D4",group:"D",stage:"Group D",home:"USA",away:"Australia",kickoff:"2026-06-19T19:00:00Z",venue:"Lumen Field"},
+  {id:"D5",group:"D",stage:"Group D",home:"Türkiye",away:"USA",kickoff:"2026-06-26T02:00:00Z",venue:"SoFi Stadium"},
+  {id:"D6",group:"D",stage:"Group D",home:"Paraguay",away:"Australia",kickoff:"2026-06-26T02:00:00Z",venue:"Levi's Stadium"},
+  // GROUP E
+  {id:"E1",group:"E",stage:"Group E",home:"Germany",away:"Curaçao",kickoff:"2026-06-14T17:00:00Z",venue:"NRG Stadium"},
+  {id:"E2",group:"E",stage:"Group E",home:"Ivory Coast",away:"Ecuador",kickoff:"2026-06-14T23:00:00Z",venue:"Lincoln Financial Field"},
+  {id:"E3",group:"E",stage:"Group E",home:"Germany",away:"Ivory Coast",kickoff:"2026-06-20T20:00:00Z",venue:"BMO Field"},
+  {id:"E4",group:"E",stage:"Group E",home:"Ecuador",away:"Curaçao",kickoff:"2026-06-21T00:00:00Z",venue:"Arrowhead Stadium"},
+  {id:"E5",group:"E",stage:"Group E",home:"Ecuador",away:"Germany",kickoff:"2026-06-25T20:00:00Z",venue:"MetLife Stadium"},
+  {id:"E6",group:"E",stage:"Group E",home:"Curaçao",away:"Ivory Coast",kickoff:"2026-06-25T20:00:00Z",venue:"Lincoln Financial Field"},
+  // GROUP F
+  {id:"F1",group:"F",stage:"Group F",home:"Netherlands",away:"Japan",kickoff:"2026-06-14T20:00:00Z",venue:"AT&T Stadium"},
+  {id:"F2",group:"F",stage:"Group F",home:"Ukraine",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
+  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Ukraine",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
+  {id:"F4",group:"F",stage:"Group F",home:"Tunisia",away:"Japan",kickoff:"2026-06-20T04:00:00Z",venue:"Estadio BBVA"},
+  {id:"F5",group:"F",stage:"Group F",home:"Tunisia",away:"Netherlands",kickoff:"2026-06-25T23:00:00Z",venue:"AT&T Stadium"},
+  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Ukraine",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
+  // GROUP G
+  {id:"G1",group:"G",stage:"Group G",home:"Belgium",away:"Egypt",kickoff:"2026-06-15T19:00:00Z",venue:"Lumen Field"},
+  {id:"G2",group:"G",stage:"Group G",home:"Iran",away:"New Zealand",kickoff:"2026-06-16T01:00:00Z",venue:"SoFi Stadium"},
+  {id:"G3",group:"G",stage:"Group G",home:"Belgium",away:"Iran",kickoff:"2026-06-21T19:00:00Z",venue:"SoFi Stadium"},
+  {id:"G4",group:"G",stage:"Group G",home:"New Zealand",away:"Egypt",kickoff:"2026-06-22T01:00:00Z",venue:"BC Place"},
+  {id:"G5",group:"G",stage:"Group G",home:"New Zealand",away:"Belgium",kickoff:"2026-06-27T03:00:00Z",venue:"BC Place"},
+  {id:"G6",group:"G",stage:"Group G",home:"Egypt",away:"Iran",kickoff:"2026-06-27T03:00:00Z",venue:"Lumen Field"},
+  // GROUP H
+  {id:"H1",group:"H",stage:"Group H",home:"Spain",away:"Cape Verde",kickoff:"2026-06-15T16:00:00Z",venue:"Mercedes-Benz Stadium"},
+  {id:"H2",group:"H",stage:"Group H",home:"Saudi Arabia",away:"Uruguay",kickoff:"2026-06-15T22:00:00Z",venue:"Hard Rock Stadium"},
+  {id:"H3",group:"H",stage:"Group H",home:"Spain",away:"Saudi Arabia",kickoff:"2026-06-21T16:00:00Z",venue:"Mercedes-Benz Stadium"},
+  {id:"H4",group:"H",stage:"Group H",home:"Uruguay",away:"Cape Verde",kickoff:"2026-06-21T22:00:00Z",venue:"Hard Rock Stadium"},
+  {id:"H5",group:"H",stage:"Group H",home:"Uruguay",away:"Spain",kickoff:"2026-06-27T00:00:00Z",venue:"NRG Stadium"},
+  {id:"H6",group:"H",stage:"Group H",home:"Cape Verde",away:"Saudi Arabia",kickoff:"2026-06-27T00:00:00Z",venue:"Estadio Akron"},
+  // GROUP I
+  {id:"I1",group:"I",stage:"Group I",home:"France",away:"Senegal",kickoff:"2026-06-16T19:00:00Z",venue:"MetLife Stadium"},
+  {id:"I2",group:"I",stage:"Group I",home:"Iraq",away:"Norway",kickoff:"2026-06-16T22:00:00Z",venue:"Gillette Stadium"},
+  {id:"I3",group:"I",stage:"Group I",home:"France",away:"Iraq",kickoff:"2026-06-22T21:00:00Z",venue:"Lincoln Financial Field"},
+  {id:"I4",group:"I",stage:"Group I",home:"Norway",away:"Senegal",kickoff:"2026-06-23T00:00:00Z",venue:"MetLife Stadium"},
+  {id:"I5",group:"I",stage:"Group I",home:"Norway",away:"France",kickoff:"2026-06-26T19:00:00Z",venue:"Gillette Stadium"},
+  {id:"I6",group:"I",stage:"Group I",home:"Senegal",away:"Iraq",kickoff:"2026-06-26T19:00:00Z",venue:"BMO Field"},
+  // GROUP J
+  {id:"J1",group:"J",stage:"Group J",home:"Argentina",away:"Algeria",kickoff:"2026-06-17T01:00:00Z",venue:"Arrowhead Stadium"},
+  {id:"J2",group:"J",stage:"Group J",home:"Austria",away:"Jordan",kickoff:"2026-06-16T04:00:00Z",venue:"Levi's Stadium"},
+  {id:"J3",group:"J",stage:"Group J",home:"Argentina",away:"Austria",kickoff:"2026-06-22T17:00:00Z",venue:"AT&T Stadium"},
+  {id:"J4",group:"J",stage:"Group J",home:"Jordan",away:"Algeria",kickoff:"2026-06-23T03:00:00Z",venue:"Levi's Stadium"},
+  {id:"J5",group:"J",stage:"Group J",home:"Jordan",away:"Argentina",kickoff:"2026-06-28T02:00:00Z",venue:"AT&T Stadium"},
+  {id:"J6",group:"J",stage:"Group J",home:"Algeria",away:"Austria",kickoff:"2026-06-28T02:00:00Z",venue:"Arrowhead Stadium"},
+  // GROUP K
+  {id:"K1",group:"K",stage:"Group K",home:"Portugal",away:"DR Congo",kickoff:"2026-06-17T17:00:00Z",venue:"NRG Stadium"},
+  {id:"K2",group:"K",stage:"Group K",home:"Uzbekistan",away:"Colombia",kickoff:"2026-06-18T02:00:00Z",venue:"Estadio Azteca"},
+  {id:"K3",group:"K",stage:"Group K",home:"Portugal",away:"Uzbekistan",kickoff:"2026-06-23T17:00:00Z",venue:"NRG Stadium"},
+  {id:"K4",group:"K",stage:"Group K",home:"Colombia",away:"DR Congo",kickoff:"2026-06-24T02:00:00Z",venue:"Estadio Akron"},
+  {id:"K5",group:"K",stage:"Group K",home:"Colombia",away:"Portugal",kickoff:"2026-06-27T23:30:00Z",venue:"Hard Rock Stadium"},
+  {id:"K6",group:"K",stage:"Group K",home:"DR Congo",away:"Uzbekistan",kickoff:"2026-06-27T23:30:00Z",venue:"Mercedes-Benz Stadium"},
+  // GROUP L
+  {id:"L1",group:"L",stage:"Group L",home:"England",away:"Croatia",kickoff:"2026-06-17T20:00:00Z",venue:"AT&T Stadium"},
+  {id:"L2",group:"L",stage:"Group L",home:"Ghana",away:"Panama",kickoff:"2026-06-17T23:00:00Z",venue:"BMO Field"},
+  {id:"L3",group:"L",stage:"Group L",home:"England",away:"Ghana",kickoff:"2026-06-23T20:00:00Z",venue:"Gillette Stadium"},
+  {id:"L4",group:"L",stage:"Group L",home:"Panama",away:"Croatia",kickoff:"2026-06-23T23:00:00Z",venue:"BMO Field"},
+  {id:"L5",group:"L",stage:"Group L",home:"Panama",away:"England",kickoff:"2026-06-27T21:00:00Z",venue:"MetLife Stadium"},
+  {id:"L6",group:"L",stage:"Group L",home:"Croatia",away:"Ghana",kickoff:"2026-06-27T21:00:00Z",venue:"Lincoln Financial Field"},
 ];
 
 const KO_MATCHES = [
@@ -591,7 +649,7 @@ Use exact team names as given. Be precise with scores.`;
                   letterSpacing:0.5,lineHeight:1.1
                 }}>World Cup 2026</div>
                 <div style={{
-                  fontSize:12,letterSpacing:4,color:"#a2ceec",
+                  fontsize:12,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
                 }}>PBD Predictor</div>
               </div>
@@ -619,10 +677,10 @@ Use exact team names as given. Be precise with scores.`;
                     width:26,height:26,borderRadius:"50%",
                     background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                     display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:12,fontWeight:800,color:"#000"
+                    fontsize:12,fontWeight:800,color:"#000"
                   }}>{getInitials(userName)}</div>
                   <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
-                  {submitted && <span style={{fontSize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
+                  {submitted && <span style={{fontsize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
                 <button onClick={handleLogout} style={{
                   background:"rgba(255,255,255,0.05)",
@@ -646,7 +704,7 @@ Use exact team names as given. Be precise with scores.`;
               <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="leaderboard")loadGlobal();}} style={{
                 padding:"10px 20px",background:"none",border:"none",
                 cursor:"pointer",fontFamily:"inherit",
-                fontSize:15,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",
+                fontsize:15,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",
                 color:tab===t.id?"#a2ceec":"rgba(255,255,255,0.28)",
                 borderBottom:tab===t.id?"2px solid #1c76bc":"2px solid transparent",
                 marginBottom:-1,transition:"all 0.15s"
@@ -674,7 +732,7 @@ Use exact team names as given. Be precise with scores.`;
                 <h2 style={{margin:"0 0 4px",fontSize:20,color:"#fff",fontWeight:700}}>
                   FIFA World Cup 2026
                 </h2>
-                <p style={{margin:0,fontSize:15,color:"rgba(255,255,255,0.3)"}}>
+                <p style={{margin:0,fontsize:15,color:"rgba(255,255,255,0.3)"}}>
                   USA · Canada · Mexico · Jun 11 – Jul 19
                 </p>
               </div>
@@ -709,7 +767,7 @@ Use exact team names as given. Be precise with scores.`;
                     padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
                     border:"1px solid rgba(255,255,255,0.13)",
-                    borderRadius:9,color:"#fff",fontSize:15,
+                    borderRadius:9,color:"#fff",fontSize:13,
                     fontFamily:"inherit",outline:"none"
                   }}
                 />
@@ -723,7 +781,7 @@ Use exact team names as given. Be precise with scores.`;
                     padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
                     border:"1px solid rgba(255,255,255,0.13)",
-                    borderRadius:9,color:"#fff",fontSize:15,
+                    borderRadius:9,color:"#fff",fontSize:13,
                     fontFamily:"inherit",outline:"none"
                   }}
                 />
@@ -738,7 +796,7 @@ Use exact team names as given. Be precise with scores.`;
                       padding:"11px 14px",
                       background:"rgba(255,255,255,0.07)",
                       border:"1px solid rgba(255,255,255,0.13)",
-                      borderRadius:9,color:"#fff",fontSize:15,
+                      borderRadius:9,color:"#fff",fontSize:13,
                       fontFamily:"inherit",outline:"none"
                     }}
                   />
@@ -764,7 +822,7 @@ Use exact team names as given. Be precise with scores.`;
                   background:authLoading?"rgba(28,118,188,0.3)":"linear-gradient(135deg,#1c76bc,#292562)",
                   border:"none",borderRadius:9,
                   color:authLoading?"rgba(255,255,255,0.4)":"#fff",
-                  fontWeight:700,fontSize:15,cursor:authLoading?"not-allowed":"pointer",
+                  fontWeight:700,fontSize:13,cursor:authLoading?"not-allowed":"pointer",
                   fontFamily:"inherit",letterSpacing:0.3,
                   boxShadow:"0 4px 14px rgba(28,118,188,0.3)"
                 }}
@@ -775,7 +833,7 @@ Use exact team names as given. Be precise with scores.`;
               </button>
 
               {/* Switch mode hint */}
-              <p style={{textAlign:"center",marginTop:16,fontSize:15,color:"rgba(255,255,255,0.2)"}}>
+              <p style={{textAlign:"center",marginTop:16,fontsize:15,color:"rgba(255,255,255,0.2)"}}>
                 {authMode==="login"
                   ? <>No account? <span onClick={()=>{setAuthMode("register");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Register here</span></>
                   : <>Already registered? <span onClick={()=>{setAuthMode("login");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Log in</span></>
@@ -787,7 +845,7 @@ Use exact team names as given. Be precise with scores.`;
                 background:"rgba(28,118,188,0.06)",border:"1px solid rgba(28,118,188,0.12)",
                 borderRadius:7,fontSize:10,color:"rgba(255,255,255,0.25)",textAlign:"center"
               }}>
-                ⏱ Predictions lock 1 hour before each kick-off
+                ⏱ Predictions lock 1 hour before each kick-off · All times SAST (UTC+2)
               </div>
             </div>
           ) : (
@@ -800,7 +858,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"1px solid rgba(74,222,128,0.18)",
                   borderRadius:9,padding:"9px 14px",
                   display:"flex",alignItems:"center",gap:8,
-                  fontSize:15,color:"rgba(74,222,128,0.8)"
+                  fontsize:15,color:"rgba(74,222,128,0.8)"
                 }}>
                   <span>✓</span>
                   <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in grey</span>
@@ -825,11 +883,11 @@ Use exact team names as given. Be precise with scores.`;
                       background:activeGroup===g?"rgba(28,118,188,0.18)":"transparent",
                       border:activeGroup===g?"1px solid rgba(28,118,188,0.35)":"1px solid transparent",
                       color:activeGroup===g?"#a2ceec":done?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.25)",
-                      fontSize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                      fontsize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
                       display:"flex",alignItems:"center",gap:3
                     }}>
                       {g==="KO"?"KO":g}
-                      {done&&<span style={{color:"#4ade80",fontSize:15}}>✓</span>}
+                      {done&&<span style={{color:"#4ade80",fontsize:15}}>✓</span>}
                       {hasLive&&<span style={{color:"#fbbf24",fontSize:7}}>●</span>}
                     </button>
                   );
@@ -883,22 +941,22 @@ Use exact team names as given. Be precise with scores.`;
                       {/* Date / lock state */}
                       <div style={{minWidth:60,textAlign:"center",flexShrink:0}}>
                         {hasResult ? (
-                          <div style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
+                          <div style={{fontsize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
                         ) : locked ? (
-                          <div style={{fontSize:12,color:"#fbbf24"}}>🔒</div>
+                          <div style={{fontsize:12,color:"#fbbf24"}}>🔒</div>
                         ) : deadline ? (
-                          <div style={{fontSize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
+                          <div style={{fontsize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
                         ) : match.kickoff ? (
-                          <div style={{fontSize:15,color:"rgba(255,255,255,0.22)"}}>
+                          <div style={{fontsize:15,color:"rgba(255,255,255,0.22)"}}>
                             {fmtDate(match.kickoff)}<br/>
-                            {new Date(match.kickoff).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}
+                            {fmtTime(match.kickoff)}
                           </div>
                         ) : (
-                          <div style={{fontSize:15,color:"rgba(255,255,255,0.18)"}}>TBD</div>
+                          <div style={{fontsize:15,color:"rgba(255,255,255,0.18)"}}>TBD</div>
                         )}
                         {ptsBadge && (
                           <div style={{
-                            marginTop:3,fontSize:12,fontWeight:700,
+                            marginTop:3,fontsize:12,fontWeight:700,
                             color:ptsBadge.c,background:ptsBadge.b,
                             borderRadius:4,padding:"1px 5px",display:"inline-block"
                           }}>{ptsBadge.v}</div>
@@ -907,7 +965,7 @@ Use exact team names as given. Be precise with scores.`;
 
                       {/* Home team */}
                       <span style={{
-                        flex:1,fontSize:15,textAlign:"right",
+                        flex:1,fontsize:15,textAlign:"right",
                         color: locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.home)}</span>
@@ -953,7 +1011,7 @@ Use exact team names as given. Be precise with scores.`;
 
                       {/* Away team */}
                       <span style={{
-                        flex:1,fontSize:15,
+                        flex:1,fontsize:15,
                         color:locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.away)}</span>
@@ -961,7 +1019,7 @@ Use exact team names as given. Be precise with scores.`;
                       {/* Result badge */}
                       {hasResult && (
                         <div style={{
-                          fontSize:15,fontWeight:700,
+                          fontSize:13,fontWeight:700,
                           minWidth:40,textAlign:"center",
                           background:"rgba(74,222,128,0.08)",
                           border:"1px solid rgba(74,222,128,0.2)",
@@ -971,7 +1029,7 @@ Use exact team names as given. Be precise with scores.`;
                       )}
                       {locked && !hasResult && (
                         <div style={{
-                          fontSize:12,color:"rgba(251,191,36,0.5)",
+                          fontsize:12,color:"rgba(251,191,36,0.5)",
                           minWidth:40,textAlign:"center",flexShrink:0
                         }}>Pending</div>
                       )}
@@ -987,16 +1045,16 @@ Use exact team names as given. Be precise with scores.`;
                   background:saving?"rgba(28,118,188,0.25)":"linear-gradient(135deg,#1c76bc,#1c76bc)",
                   border:"none",borderRadius:50,
                   color:saving?"rgba(255,255,255,0.4)":"#fff",
-                  fontWeight:800,fontSize:15,cursor:saving?"not-allowed":"pointer",
+                  fontWeight:800,fontSize:13,cursor:saving?"not-allowed":"pointer",
                   fontFamily:"inherit",letterSpacing:0.5,
                   boxShadow:"0 4px 20px rgba(28,118,188,0.3)"
                 }}>{saving?"Saving…":submitted?"Update Predictions":"Submit Predictions"}</button>
-                <span style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
+                <span style={{fontsize:15,color:"rgba(255,255,255,0.2)"}}>
                   {totalPreds} / 104 filled
                 </span>
               </div>
               <p style={{textAlign:"center",marginTop:8,fontSize:10,color:"rgba(255,255,255,0.17)"}}>
-                +10 exact score · +5 correct result · Locks 1hr before kick-off
+                +10 exact score · +5 correct result · Locks 1hr before kick-off · All times SAST
               </p>
             </>
           )
@@ -1072,11 +1130,11 @@ Use exact team names as given. Be precise with scores.`;
                           fontSize:10,fontWeight:800,color:isMe?"#000":"rgba(255,255,255,0.35)"
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
-                          <div style={{fontSize:15,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
-                            {entry.name} {isMe&&<span style={{fontSize:12,opacity:0.4}}>(you)</span>}
+                          <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
+                            {entry.name} {isMe&&<span style={{fontsize:12,opacity:0.4}}>(you)</span>}
                           </div>
                           {entry.count&&(
-                            <div style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
+                            <div style={{fontsize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
                               {entry.count} predictions
                             </div>
                           )}
@@ -1086,7 +1144,7 @@ Use exact team names as given. Be precise with scores.`;
                             fontSize:22,fontWeight:700,
                             color:i===0?"#a2ceec":i<3?"#e8f2fb":"rgba(255,255,255,0.35)"
                           }}>{entry.points}</span>
-                          <span style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
+                          <span style={{fontsize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
                         </div>
                       </div>
                     </div>
@@ -1135,16 +1193,16 @@ Use exact team names as given. Be precise with scores.`;
                   padding:"10px 28px",
                   background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                   border:"none",borderRadius:8,
-                  color:"#000",fontWeight:800,fontSize:15,cursor:"pointer",fontFamily:"inherit"
+                  color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
-              
+               
               </div>
             ) : (
               <>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
                   <div>
                     <h2 style={{margin:"0 0 2px",fontSize:16,color:"#fff"}}>Admin Panel</h2>
-                    <p style={{margin:0,fontSize:15,color:"rgba(255,255,255,0.3)"}}>
+                    <p style={{margin:0,fontsize:15,color:"rgba(255,255,255,0.3)"}}>
                       Fetch results via AI web search · Manually override below
                     </p>
                   </div>
@@ -1164,10 +1222,10 @@ Use exact team names as given. Be precise with scores.`;
                 }}>
                   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
                     <div>
-                      <div style={{fontSize:15,fontWeight:700,color:"#a2ceec",marginBottom:4}}>
+                      <div style={{fontSize:13,fontWeight:700,color:"#a2ceec",marginBottom:4}}>
                         🤖 Auto-Fetch Results
                       </div>
-                      <div style={{fontSize:15,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>
+                      <div style={{fontsize:15,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>
                         Searches the web for today's & recent World Cup 2026 results,<br/>
                         parses scores automatically and updates the leaderboard.
                       </div>
@@ -1187,7 +1245,7 @@ Use exact team names as given. Be precise with scores.`;
                           : "linear-gradient(135deg,#1c76bc,#1c76bc)",
                         border:"none",borderRadius:10,
                         color:fetching?"rgba(0,0,0,0.4)":"#000",
-                        fontWeight:800,fontSize:15,
+                        fontWeight:800,fontSize:13,
                         cursor:fetching?"not-allowed":"pointer",
                         fontFamily:"inherit",
                         boxShadow:fetching?"none":"0 4px 16px rgba(28,118,188,0.3)",
@@ -1205,7 +1263,7 @@ Use exact team names as given. Be precise with scores.`;
                       background:"rgba(0,0,0,0.3)",
                       border:"1px solid rgba(255,255,255,0.06)",
                       borderRadius:8,padding:"12px 14px",
-                      fontFamily:"monospace",fontSize:15,
+                      fontFamily:"monospace",fontsize:15,
                       display:"flex",flexDirection:"column",gap:4
                     }}>
                       {fetchLog.map((line,i) => (
@@ -1226,7 +1284,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"1px solid rgba(239,68,68,0.15)",
                   borderRadius:14,padding:"16px 20px",marginBottom:20
                 }}>
-                  <div style={{fontSize:15,fontWeight:700,color:"#f87171",marginBottom:12}}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#f87171",marginBottom:12}}>
                     👥 Manage Players
                   </div>
                   {leaderboard.length === 0 ? (
@@ -1267,7 +1325,7 @@ Use exact team names as given. Be precise with scores.`;
                             background:"rgba(239,68,68,0.12)",
                             border:"1px solid rgba(239,68,68,0.25)",
                             borderRadius:6,color:"#f87171",
-                            fontSize:15,fontWeight:700,
+                            fontsize:15,fontWeight:700,
                             cursor:"pointer",fontFamily:"inherit",
                             flexShrink:0
                           }}>Remove</button>
@@ -1310,15 +1368,16 @@ Use exact team names as given. Be precise with scores.`;
                       }}>
                         <div style={{minWidth:52,textAlign:"center"}}>
                           {match.kickoff&&(
-                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
-                              {fmtDate(match.kickoff)}
+                            <div style={{fontsize:15,color:"rgba(255,255,255,0.2)"}}>
+                              {fmtDate(match.kickoff)}<br/>
+                              {fmtTime(match.kickoff)}
                             </div>
                           )}
                           {r.home!==""&&r.away!==""&&(
-                            <div style={{fontSize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
+                            <div style={{fontsize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
                           )}
                         </div>
-                        <span style={{flex:1,fontSize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
+                        <span style={{flex:1,fontsize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
                         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                           <input type="number" min={0} max={99}
                             value={r.home}
@@ -1356,7 +1415,7 @@ Use exact team names as given. Be precise with scores.`;
                             }}
                           />
                         </div>
-                        <span style={{flex:1,fontSize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
+                        <span style={{flex:1,fontsize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
                       </div>
                     );
                   })}
