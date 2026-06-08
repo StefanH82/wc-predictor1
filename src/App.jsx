@@ -261,7 +261,7 @@ const db = {
     return map;
   },
 
-  // Save predictions (upsert all at once)
+  // Save predictions (upsert — update if exists, insert if new)
   async savePredictions(userId, predictions) {
     const rows = Object.entries(predictions)
       .filter(([, p]) => p && p.home !== "" && p.away !== "")
@@ -272,17 +272,21 @@ const db = {
         away_score: parseInt(p.away)
       }));
     if (!rows.length) return;
-    // Use fetch directly to ensure correct Prefer header for upsert
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/predictions`, {
-      method: "POST",
-      headers: {
-        "apikey": SUPABASE_ANON,
-        "Authorization": `Bearer ${SUPABASE_ANON}`,
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates,return=minimal"
-      },
-      body: JSON.stringify(rows)
-    });
+
+    // Use Supabase upsert endpoint with on_conflict to handle duplicates
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/predictions?on_conflict=user_id,match_id`,
+      {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates,return=minimal"
+        },
+        body: JSON.stringify(rows)
+      }
+    );
     if (!res.ok) {
       const err = await res.text();
       throw new Error(err);
@@ -770,7 +774,7 @@ Use exact team names as given. Be precise with scores.`;
                   value={nameInput}
                   onChange={e=>{setNameInput(e.target.value);setAuthError("");}}
                   onKeyDown={e=>e.key==="Enter"&&(authMode==="login"?handleLogin():handleRegister())}
-                  placeholder="Your name & surname"
+                  placeholder="Your name"
                   style={{
                     padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
@@ -918,11 +922,11 @@ Use exact team names as given. Be precise with scores.`;
                     const ph=parseInt(pred.home),pa=parseInt(pred.away);
                     const rh=parseInt(result.home),ra=parseInt(result.away);
                     if (!isNaN(ph)&&!isNaN(pa)) {
-                      if(ph===rh&&pa===ra) ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
+                      if(ph===rh&&pa===ra) ptsBadge={v:"+3",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
                       else {
                         const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
                         ptsBadge = pw===rw
-                          ? {v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
+                          ? {v:"+1",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
                           : {v:"0",c:"rgba(255,255,255,0.25)",b:"rgba(255,255,255,0.04)"};
                       }
                     }
@@ -979,7 +983,7 @@ Use exact team names as given. Be precise with scores.`;
                       }}>{tf(match.home)}</span>
 
                       {/* Score inputs */}
-                      <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0,pointerEvents:locked?"none":"auto"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                         <input type="number" min={0} max={99}
                           value={pred.home}
                           onChange={e => { if (!locked) setPred(match.id,"home",e.target.value); }}
@@ -994,15 +998,15 @@ Use exact team names as given. Be precise with scores.`;
                             borderRadius:6,
                             color:locked?"rgba(255,255,255,0.3)":"#fff",
                             fontSize:15,fontWeight:700,fontFamily:"inherit",outline:"none",
-                            cursor:locked?"not-allowed":"text"
+                            cursor:locked?"not-allowed":"text",
+                            pointerEvents:locked?"none":"auto"
                           }}
                         />
-                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:10,fontWeight:300,pointerEvents:locked?"none":"auto"}}>:</span>
+                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:10,fontWeight:300}}>:</span>
                         <input type="number" min={0} max={99}
                           value={pred.away}
                           onChange={e => { if (!locked) setPred(match.id,"away",e.target.value); }}
                           onKeyDown={e => { if (locked) e.preventDefault(); }}
-                          readOnly={locked}
                           placeholder="-"
                           style={{
                             width:34,height:32,textAlign:"center",
@@ -1013,7 +1017,8 @@ Use exact team names as given. Be precise with scores.`;
                             borderRadius:6,
                             color:locked?"rgba(255,255,255,0.3)":"#fff",
                             fontSize:15,fontWeight:700,fontFamily:"inherit",outline:"none",
-                            cursor:locked?"not-allowed":"text"
+                            cursor:locked?"not-allowed":"text",
+                            pointerEvents:locked?"none":"auto"
                           }}
                         />
                       </div>
@@ -1087,9 +1092,9 @@ Use exact team names as given. Be precise with scores.`;
               background:"rgba(255,255,255,0.025)",borderRadius:8,flexWrap:"wrap"
             }}>
               {[
-                {pts:"+10",label:"Exact score",c:"#1c76bc"},
-                {pts:"+5",label:"Correct result",c:"#60a5fa"},
-                {pts:"1040",label:"Max pts",c:"rgba(255,255,255,0.5)"}
+                {pts:"+3",label:"Exact score",c:"#1c76bc"},
+                {pts:"+1",label:"Correct result",c:"#60a5fa"},
+                {pts:"312",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
                 <span key={label} style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
                   <span style={{color:c,fontWeight:700}}>{pts}</span> {label}
@@ -1204,7 +1209,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"none",borderRadius:8,
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
-               
+                
               </div>
             ) : (
               <>
