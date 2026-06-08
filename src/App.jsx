@@ -20,33 +20,31 @@ const TEAM_FLAGS = {
 const tf = (t) => `${TEAM_FLAGS[t]||"🏳️"} ${t}`;
 
 // ─── SAST DISPLAY HELPERS (UTC+2, South Africa Standard Time) ────────────────
-const SAST_OFFSET = 2 * 60; // minutes ahead of UTC
+// Force Africa/Johannesburg timezone explicitly — ignores browser/device timezone
 
-function toSAST(iso) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  // shift by +2 hours
-  return new Date(d.getTime() + SAST_OFFSET * 60 * 1000);
-}
+const SAST_TZ = "Africa/Johannesburg";
 
-// "Jun 11" in SAST
 function fmtDate(iso) {
   if (!iso) return "";
-  return toSAST(iso).toLocaleDateString("en-GB",{month:"short",day:"numeric"});
+  return new Date(iso).toLocaleDateString("en-GB", {
+    timeZone: SAST_TZ, month: "short", day: "numeric"
+  });
 }
 
-// "21:00 SAST"
 function fmtTime(iso) {
   if (!iso) return "";
-  return toSAST(iso).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}) + " SAST";
+  const t = new Date(iso).toLocaleTimeString("en-GB", {
+    timeZone: SAST_TZ, hour: "2-digit", minute: "2-digit"
+  });
+  return `${t} SAST`;
 }
 
-// "Jun 11 · 21:00 SAST"
 function fmtDateTime(iso) {
   if (!iso) return "";
-  const d = toSAST(iso);
-  const date = d.toLocaleDateString("en-GB",{month:"short",day:"numeric"});
-  const time = d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const date = fmtDate(iso);
+  const time = new Date(iso).toLocaleTimeString("en-GB", {
+    timeZone: SAST_TZ, hour: "2-digit", minute: "2-digit"
+  });
   return `${date} · ${time} SAST`;
 }
 
