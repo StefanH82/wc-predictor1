@@ -478,7 +478,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#c9a227",
                   textTransform:"uppercase",marginTop:1
-                }}>Company Predictor</div>
+                }}>Premium brands distributors Predictor</div>
               </div>
             </div>
 
