@@ -660,7 +660,7 @@ Use exact team names as given. Be precise with scores.`;
         left:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:200,
+        width:400,
         height:500,
         zIndex:5,
         pointerEvents:"none",
