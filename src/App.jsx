@@ -852,11 +852,11 @@ Use exact team names as given. Be precise with scores.`;
                     const ph=parseInt(pred.home),pa=parseInt(pred.away);
                     const rh=parseInt(result.home),ra=parseInt(result.away);
                     if (!isNaN(ph)&&!isNaN(pa)) {
-                      if(ph===rh&&pa===ra) ptsBadge={v:"+3",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
+                      if(ph===rh&&pa===ra) ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
                       else {
                         const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
                         ptsBadge = pw===rw
-                          ? {v:"+1",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
+                          ? {v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
                           : {v:"0",c:"rgba(255,255,255,0.25)",b:"rgba(255,255,255,0.04)"};
                       }
                     }
@@ -996,7 +996,7 @@ Use exact team names as given. Be precise with scores.`;
                 </span>
               </div>
               <p style={{textAlign:"center",marginTop:8,fontSize:10,color:"rgba(255,255,255,0.17)"}}>
-                +3 exact score · +1 correct result · Locks 1hr before kick-off
+                +10 exact score · +5 correct result · Locks 1hr before kick-off
               </p>
             </>
           )
@@ -1020,8 +1020,8 @@ Use exact team names as given. Be precise with scores.`;
               background:"rgba(255,255,255,0.025)",borderRadius:8,flexWrap:"wrap"
             }}>
               {[
-                {pts:"+3",label:"Exact score",c:"#1c76bc"},
-                {pts:"+1",label:"Correct result",c:"#60a5fa"},
+                {pts:"+10",label:"Exact score",c:"#1c76bc"},
+                {pts:"+5",label:"Correct result",c:"#60a5fa"},
                 {pts:"312",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
                 <span key={label} style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
@@ -1064,7 +1064,7 @@ Use exact team names as given. Be precise with scores.`;
                         <span style={{
                           fontSize:i<3?18:12,minWidth:26,textAlign:"center",
                           color:i>=3?"rgba(255,255,255,0.2)":undefined
-                        }}>{i<3?medals[i]:i+1}</span>
+                        }}>{i<3?medals[i]:i+5}</span>
                         <div style={{
                           width:30,height:30,borderRadius:"50%",flexShrink:0,
                           background:isMe?"linear-gradient(135deg,#1c76bc,#1c76bc)":"rgba(255,255,255,0.07)",
