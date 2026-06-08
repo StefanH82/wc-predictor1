@@ -159,7 +159,7 @@ const store = {
 };
 
 
-const ADMIN_PIN = "wc2026admin";
+const ADMIN_PIN = "wc2026SH";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
