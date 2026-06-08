@@ -384,6 +384,7 @@ export default function App() {
 
   // Screen width tracker for side panels
   const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
+  const [statsSection, setStatsSection] = useState("rankings");
   useEffect(() => {
     const handleResize = () => setIsWideScreen(window.innerWidth > 1200);
     window.addEventListener("resize", handleResize);
@@ -1054,13 +1055,13 @@ Use exact team names as given. Be precise with scores.`;
                       background:locked
                         ? hasResult
                           ? "rgba(255,255,255,0.025)"
-                          : "rgba(239,68,68,0.06)"
+                          : "rgba(255,200,0,0.03)"
                         : hasPred
                           ? "rgba(28,118,188,0.05)"
                           : "rgba(255,255,255,0.02)",
                       border:`1px solid ${
                         locked && hasResult ? "rgba(255,255,255,0.06)"
-                        : locked ? "rgba(239,68,68,0.25)"
+                        : locked ? "rgba(251,191,36,0.15)"
                         : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
                       borderRadius:9,padding:"9px 12px",
@@ -1745,9 +1746,7 @@ Use exact team names as given. Be precise with scores.`;
           </div>
         )}
         {/* ═══ STATS TAB ═══ */}
-        {tab==="stats" && (() => {
-          const [statsSection, setStatsSection] = useState("rankings");
-
+        {tab==="stats" && (()=>{
           const FIFA_RANKINGS = [
             {rank:1,team:"France",flag:"🇫🇷",pts:1877,change:"▲2"},
             {rank:2,team:"Spain",flag:"🇪🇸",pts:1876,change:"▲1"},
