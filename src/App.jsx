@@ -261,7 +261,7 @@ const db = {
     return map;
   },
 
-  // Save predictions (upsert — update if exists, insert if new)
+  // Save predictions — delete existing then insert fresh (avoids upsert conflicts)
   async savePredictions(userId, predictions) {
     const rows = Object.entries(predictions)
       .filter(([, p]) => p && p.home !== "" && p.away !== "")
@@ -273,23 +273,40 @@ const db = {
       }));
     if (!rows.length) return;
 
-    // Use Supabase upsert endpoint with on_conflict to handle duplicates
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/predictions?on_conflict=user_id,match_id`,
+    // Step 1: Delete all existing predictions for this user
+    const del = await fetch(
+      `${SUPABASE_URL}/rest/v1/predictions?user_id=eq.${userId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    if (!del.ok) {
+      const err = await del.text();
+      throw new Error("Delete failed: " + err);
+    }
+
+    // Step 2: Insert all predictions fresh
+    const ins = await fetch(
+      `${SUPABASE_URL}/rest/v1/predictions`,
       {
         method: "POST",
         headers: {
           "apikey": SUPABASE_ANON,
           "Authorization": `Bearer ${SUPABASE_ANON}`,
           "Content-Type": "application/json",
-          "Prefer": "resolution=merge-duplicates,return=minimal"
+          "Prefer": "return=minimal"
         },
         body: JSON.stringify(rows)
       }
     );
-    if (!res.ok) {
-      const err = await res.text();
-      throw new Error(err);
+    if (!ins.ok) {
+      const err = await ins.text();
+      throw new Error("Insert failed: " + err);
     }
   },
 
@@ -689,10 +706,10 @@ Use exact team names as given. Be precise with scores.`;
                     width:26,height:26,borderRadius:"50%",
                     background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                     display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:12,fontWeight:800,color:"#000"
+                    fontSize:15,fontWeight:800,color:"#000"
                   }}>{getInitials(userName)}</div>
                   <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
-                  {submitted && <span style={{fontSize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
+                  {submitted && <span style={{fontSize:15,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
                 <button onClick={handleLogout} style={{
                   background:"rgba(255,255,255,0.05)",
@@ -955,7 +972,7 @@ Use exact team names as given. Be precise with scores.`;
                         {hasResult ? (
                           <div style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
                         ) : locked ? (
-                          <div style={{fontSize:12,color:"#fbbf24"}}>🔒</div>
+                          <div style={{fontSize:15,color:"#fbbf24"}}>🔒</div>
                         ) : deadline ? (
                           <div style={{fontSize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
                         ) : match.kickoff ? (
@@ -968,7 +985,7 @@ Use exact team names as given. Be precise with scores.`;
                         )}
                         {ptsBadge && (
                           <div style={{
-                            marginTop:3,fontSize:12,fontWeight:700,
+                            marginTop:3,fontSize:15,fontWeight:700,
                             color:ptsBadge.c,background:ptsBadge.b,
                             borderRadius:4,padding:"1px 5px",display:"inline-block"
                           }}>{ptsBadge.v}</div>
@@ -1043,7 +1060,7 @@ Use exact team names as given. Be precise with scores.`;
                       )}
                       {locked && !hasResult && (
                         <div style={{
-                          fontSize:12,color:"rgba(251,191,36,0.5)",
+                          fontSize:15,color:"rgba(251,191,36,0.5)",
                           minWidth:40,textAlign:"center",flexShrink:0
                         }}>Pending</div>
                       )}
@@ -1145,10 +1162,10 @@ Use exact team names as given. Be precise with scores.`;
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
-                            {entry.name} {isMe&&<span style={{fontSize:12,opacity:0.4}}>(you)</span>}
+                            {entry.name} {isMe&&<span style={{fontSize:15,opacity:0.4}}>(you)</span>}
                           </div>
                           {entry.count&&(
-                            <div style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
+                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)",marginTop:1}}>
                               {entry.count} predictions
                             </div>
                           )}
@@ -1158,7 +1175,7 @@ Use exact team names as given. Be precise with scores.`;
                             fontSize:22,fontWeight:700,
                             color:i===0?"#a2ceec":i<3?"#e8f2fb":"rgba(255,255,255,0.35)"
                           }}>{entry.points}</span>
-                          <span style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
+                          <span style={{fontSize:15,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
                         </div>
                       </div>
                     </div>
@@ -1209,7 +1226,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"none",borderRadius:8,
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
-                
+               
               </div>
             ) : (
               <>
