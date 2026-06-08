@@ -613,13 +613,34 @@ Use exact team names as given. Be precise with scores.`;
   }
 
   // ─── DISPLAY HELPERS ───────────────────────────────────────────────────────
+  const [viewMode, setViewMode] = useState("group"); // "group" | "date"
+
   function getGroupMatchList(g) {
     if (g==="KO") return KO_MATCHES;
     return GROUP_MATCHES.filter(m => m.group===g);
   }
 
+  // Group all matches by SAST date for date view
+  function getMatchesByDate() {
+    const all = [...GROUP_MATCHES, ...KO_MATCHES.filter(m => m.kickoff)];
+    const map = {};
+    all.forEach(m => {
+      if (!m.kickoff) return;
+      const dateKey = fmtDate(m.kickoff); // SAST date label e.g. "11 Jun"
+      if (!map[dateKey]) map[dateKey] = [];
+      map[dateKey].push(m);
+    });
+    // Sort each day's matches by kickoff time
+    Object.values(map).forEach(arr => arr.sort((a,b) => new Date(a.kickoff)-new Date(b.kickoff)));
+    // Return sorted array of {date, matches}
+    return Object.entries(map)
+      .sort((a,b) => new Date(map[a[0]][0].kickoff) - new Date(map[b[0]][0].kickoff))
+      .map(([date, matches]) => ({date, matches}));
+  }
+
   const activeMatchList = getGroupMatchList(activeGroup);
   const adminMatchList = getGroupMatchList(adminGroup);
+  const matchesByDate = viewMode === "date" ? getMatchesByDate() : [];
   const totalPreds = Object.values(predictions).filter(p=>p!=null&&p.home!=null&&p.away!=null&&p.home!==""&&p.away!=="").length;
   const totalResults = Object.keys(results).length;
 
@@ -706,10 +727,10 @@ Use exact team names as given. Be precise with scores.`;
                     width:26,height:26,borderRadius:"50%",
                     background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                     display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:15,fontWeight:800,color:"#000"
+                    fontSize:12,fontWeight:800,color:"#000"
                   }}>{getInitials(userName)}</div>
                   <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
-                  {submitted && <span style={{fontSize:15,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
+                  {submitted && <span style={{fontSize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
                 <button onClick={handleLogout} style={{
                   background:"rgba(255,255,255,0.05)",
@@ -894,7 +915,38 @@ Use exact team names as given. Be precise with scores.`;
                 </div>
               )}
 
-              {/* Group tabs */}
+              {/* View toggle */}
+              <div style={{
+                display:"flex",alignItems:"center",justifyContent:"space-between",
+                margin:"14px 0 0"
+              }}>
+                <div style={{fontSize:15,color:"rgba(255,255,255,0.25)"}}>
+                  {viewMode==="group" ? "Showing by group" : "Showing by date"}
+                </div>
+                <div style={{
+                  display:"flex",
+                  background:"rgba(255,255,255,0.05)",
+                  borderRadius:8,padding:3,gap:2
+                }}>
+                  <button onClick={()=>setViewMode("group")} style={{
+                    padding:"5px 12px",borderRadius:6,border:"none",
+                    background:viewMode==="group"?"rgba(28,118,188,0.4)":"transparent",
+                    color:viewMode==="group"?"#a2ceec":"rgba(255,255,255,0.3)",
+                    fontSize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                    transition:"all 0.15s"
+                  }}>⚽ By Group</button>
+                  <button onClick={()=>setViewMode("date")} style={{
+                    padding:"5px 12px",borderRadius:6,border:"none",
+                    background:viewMode==="date"?"rgba(28,118,188,0.4)":"transparent",
+                    color:viewMode==="date"?"#a2ceec":"rgba(255,255,255,0.3)",
+                    fontSize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                    transition:"all 0.15s"
+                  }}>📅 By Date</button>
+                </div>
+              </div>
+
+              {/* ── GROUP VIEW ── */}
+              {viewMode==="group" && (<>
               <div style={{
                 display:"flex",flexWrap:"wrap",gap:3,
                 margin:"14px 0 0",
@@ -972,7 +1024,7 @@ Use exact team names as given. Be precise with scores.`;
                         {hasResult ? (
                           <div style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
                         ) : locked ? (
-                          <div style={{fontSize:15,color:"#fbbf24"}}>🔒</div>
+                          <div style={{fontSize:12,color:"#fbbf24"}}>🔒</div>
                         ) : deadline ? (
                           <div style={{fontSize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
                         ) : match.kickoff ? (
@@ -985,7 +1037,7 @@ Use exact team names as given. Be precise with scores.`;
                         )}
                         {ptsBadge && (
                           <div style={{
-                            marginTop:3,fontSize:15,fontWeight:700,
+                            marginTop:3,fontSize:12,fontWeight:700,
                             color:ptsBadge.c,background:ptsBadge.b,
                             borderRadius:4,padding:"1px 5px",display:"inline-block"
                           }}>{ptsBadge.v}</div>
@@ -1060,7 +1112,7 @@ Use exact team names as given. Be precise with scores.`;
                       )}
                       {locked && !hasResult && (
                         <div style={{
-                          fontSize:15,color:"rgba(251,191,36,0.5)",
+                          fontSize:12,color:"rgba(251,191,36,0.5)",
                           minWidth:40,textAlign:"center",flexShrink:0
                         }}>Pending</div>
                       )}
@@ -1068,6 +1120,7 @@ Use exact team names as given. Be precise with scores.`;
                   );
                 })}
               </div>
+              </>)}
 
               {/* Submit */}
               <div style={{marginTop:20,display:"flex",justifyContent:"center",alignItems:"center",gap:16,flexWrap:"wrap"}}>
@@ -1087,6 +1140,165 @@ Use exact team names as given. Be precise with scores.`;
               <p style={{textAlign:"center",marginTop:8,fontSize:10,color:"rgba(255,255,255,0.17)"}}>
                 +10 exact score · +5 correct result · Locks 1hr before kick-off · All times SAST
               </p>
+
+              {/* ── DATE VIEW ── */}
+              {viewMode==="date" && (
+                <div style={{marginTop:4}}>
+                  {matchesByDate.map(({date, matches}) => (
+                    <div key={date}>
+                      {/* Date header */}
+                      <div style={{
+                        display:"flex",alignItems:"center",gap:10,
+                        padding:"16px 0 8px"
+                      }}>
+                        <div style={{
+                          fontSize:12,fontWeight:700,color:"#a2ceec",
+                          background:"rgba(28,118,188,0.15)",
+                          border:"1px solid rgba(28,118,188,0.25)",
+                          borderRadius:20,padding:"3px 12px"
+                        }}>{date}</div>
+                        <div style={{
+                          flex:1,height:1,
+                          background:"rgba(255,255,255,0.06)"
+                        }}/>
+                        <div style={{fontSize:10,color:"rgba(255,255,255,0.2)"}}>
+                          {matches.length} match{matches.length!==1?"es":""}
+                        </div>
+                      </div>
+
+                      {/* Matches for this date */}
+                      <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                        {matches.map(match => {
+                          const pred = predictions[match.id] || {home:"",away:""};
+                          const result = results[match.id];
+                          const locked = isPredictionLocked(match.kickoff);
+                          const hasPred = pred && pred.home!==""&&pred.away!=="";
+                          const hasResult = result!=null && result.home!=null && result.away!=null && result.home!==""&&result.away!=="";
+                          const deadline = timeUntilDeadline(match.kickoff);
+
+                          let ptsBadge = null;
+                          if (hasResult && hasPred) {
+                            const ph=parseInt(pred.home),pa=parseInt(pred.away);
+                            const rh=parseInt(result.home),ra=parseInt(result.away);
+                            if (!isNaN(ph)&&!isNaN(pa)) {
+                              if(ph===rh&&pa===ra) ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
+                              else {
+                                const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
+                                ptsBadge = pw===rw
+                                  ? {v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
+                                  : {v:"0",c:"rgba(255,255,255,0.25)",b:"rgba(255,255,255,0.04)"};
+                              }
+                            }
+                          }
+
+                          return (
+                            <div key={match.id} style={{
+                              background:locked
+                                ? hasResult ? "rgba(255,255,255,0.025)" : "rgba(255,200,0,0.03)"
+                                : hasPred ? "rgba(28,118,188,0.05)" : "rgba(255,255,255,0.02)",
+                              border:`1px solid ${
+                                locked && hasResult ? "rgba(255,255,255,0.06)"
+                                : locked ? "rgba(251,191,36,0.15)"
+                                : hasPred ? "rgba(28,118,188,0.18)"
+                                : "rgba(255,255,255,0.06)"}`,
+                              borderRadius:9,padding:"9px 12px",
+                              display:"flex",alignItems:"center",gap:8,
+                              opacity:locked && !hasResult ? 0.6 : 1
+                            }}>
+                              {/* Time + group label */}
+                              <div style={{minWidth:60,textAlign:"center",flexShrink:0}}>
+                                {hasResult ? (
+                                  <div style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
+                                ) : locked ? (
+                                  <div style={{fontSize:12,color:"#fbbf24"}}>🔒</div>
+                                ) : deadline ? (
+                                  <div style={{fontSize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
+                                ) : (
+                                  <div style={{fontSize:15,color:"rgba(255,255,255,0.22)"}}>
+                                    {fmtTime(match.kickoff)}
+                                  </div>
+                                )}
+                                <div style={{fontSize:7,color:"rgba(28,118,188,0.6)",marginTop:2,fontWeight:600}}>
+                                  {match.stage}
+                                </div>
+                                {ptsBadge && (
+                                  <div style={{
+                                    marginTop:2,fontSize:12,fontWeight:700,
+                                    color:ptsBadge.c,background:ptsBadge.b,
+                                    borderRadius:4,padding:"1px 5px",display:"inline-block"
+                                  }}>{ptsBadge.v}</div>
+                                )}
+                              </div>
+
+                              <span style={{
+                                flex:1,fontSize:15,textAlign:"right",
+                                color:locked?"rgba(255,255,255,0.35)":"#e8f2fb",
+                                lineHeight:1.3,fontWeight:500
+                              }}>{tf(match.home)}</span>
+
+                              <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                                <input type="number" min={0} max={99}
+                                  value={pred.home}
+                                  onChange={e => { if (!locked) setPred(match.id,"home",e.target.value); }}
+                                  onKeyDown={e => { if (locked) e.preventDefault(); }}
+                                  placeholder="-"
+                                  style={{
+                                    width:34,height:32,textAlign:"center",
+                                    background:locked?"rgba(255,255,255,0.03)":"rgba(255,255,255,0.08)",
+                                    border:`1px solid ${locked?"rgba(255,255,255,0.08)":"rgba(255,255,255,0.18)"}`,
+                                    borderRadius:6,color:locked?"rgba(255,255,255,0.3)":"#fff",
+                                    fontSize:15,fontWeight:700,fontFamily:"inherit",outline:"none",
+                                    cursor:locked?"not-allowed":"text",
+                                    pointerEvents:locked?"none":"auto"
+                                  }}
+                                />
+                                <span style={{color:"rgba(255,255,255,0.2)",fontSize:10}}>:</span>
+                                <input type="number" min={0} max={99}
+                                  value={pred.away}
+                                  onChange={e => { if (!locked) setPred(match.id,"away",e.target.value); }}
+                                  onKeyDown={e => { if (locked) e.preventDefault(); }}
+                                  placeholder="-"
+                                  style={{
+                                    width:34,height:32,textAlign:"center",
+                                    background:locked?"rgba(255,255,255,0.03)":"rgba(255,255,255,0.08)",
+                                    border:`1px solid ${locked?"rgba(255,255,255,0.08)":"rgba(255,255,255,0.18)"}`,
+                                    borderRadius:6,color:locked?"rgba(255,255,255,0.3)":"#fff",
+                                    fontSize:15,fontWeight:700,fontFamily:"inherit",outline:"none",
+                                    cursor:locked?"not-allowed":"text",
+                                    pointerEvents:locked?"none":"auto"
+                                  }}
+                                />
+                              </div>
+
+                              <span style={{
+                                flex:1,fontSize:15,
+                                color:locked?"rgba(255,255,255,0.35)":"#e8f2fb",
+                                lineHeight:1.3,fontWeight:500
+                              }}>{tf(match.away)}</span>
+
+                              {hasResult && (
+                                <div style={{
+                                  fontSize:13,fontWeight:700,minWidth:40,textAlign:"center",
+                                  background:"rgba(74,222,128,0.08)",
+                                  border:"1px solid rgba(74,222,128,0.2)",
+                                  borderRadius:6,padding:"3px 7px",
+                                  color:"#4ade80",flexShrink:0
+                                }}>{result.home}:{result.away}</div>
+                              )}
+                              {locked && !hasResult && (
+                                <div style={{
+                                  fontSize:12,color:"rgba(251,191,36,0.5)",
+                                  minWidth:40,textAlign:"center",flexShrink:0
+                                }}>Pending</div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )
         )}
@@ -1109,9 +1321,9 @@ Use exact team names as given. Be precise with scores.`;
               background:"rgba(255,255,255,0.025)",borderRadius:8,flexWrap:"wrap"
             }}>
               {[
-                {pts:"+10",label:"Exact score",c:"#1c76bc"},
-                {pts:"+5",label:"Correct result",c:"#60a5fa"},
-                {pts:"1040",label:"Max pts",c:"rgba(255,255,255,0.5)"}
+                {pts:"+3",label:"Exact score",c:"#1c76bc"},
+                {pts:"+1",label:"Correct result",c:"#60a5fa"},
+                {pts:"312",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
                 <span key={label} style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
                   <span style={{color:c,fontWeight:700}}>{pts}</span> {label}
@@ -1162,10 +1374,10 @@ Use exact team names as given. Be precise with scores.`;
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
-                            {entry.name} {isMe&&<span style={{fontSize:15,opacity:0.4}}>(you)</span>}
+                            {entry.name} {isMe&&<span style={{fontSize:12,opacity:0.4}}>(you)</span>}
                           </div>
                           {entry.count&&(
-                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)",marginTop:1}}>
+                            <div style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
                               {entry.count} predictions
                             </div>
                           )}
@@ -1175,7 +1387,7 @@ Use exact team names as given. Be precise with scores.`;
                             fontSize:22,fontWeight:700,
                             color:i===0?"#a2ceec":i<3?"#e8f2fb":"rgba(255,255,255,0.35)"
                           }}>{entry.points}</span>
-                          <span style={{fontSize:15,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
+                          <span style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
                         </div>
                       </div>
                     </div>
@@ -1226,7 +1438,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"none",borderRadius:8,
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
-               
+                
               </div>
             ) : (
               <>
