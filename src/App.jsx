@@ -255,7 +255,7 @@ const db = {
 };
 
 
-const ADMIN_PIN = "wc2026admin";
+const ADMIN_PIN = "wc2026SH";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -593,7 +593,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
-                }}>Company Predictor</div>
+                }}>PBD Predictor</div>
               </div>
             </div>
 
@@ -1137,9 +1137,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"none",borderRadius:8,
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
-                <p style={{fontSize:10,color:"rgba(255,255,255,0.15)",marginTop:14}}>
-                  Default PIN: wc2026admin
-                </p>
+              
               </div>
             ) : (
               <>
