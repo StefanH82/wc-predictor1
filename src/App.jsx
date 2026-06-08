@@ -140,26 +140,104 @@ function getInitials(n) {
   return n.split(" ").map(w=>w[0]).join("").toUpperCase().slice(0,2);
 }
 
-// ─── SAFE STORAGE WRAPPER ────────────────────────────────────────────────────
-// Falls back to localStorage if window.storage (Claude artifact API) unavailable
-const store = {
-  async get(key, shared) {
-    try {
-      if (window.storage) return await window.storage.get(key, shared);
-      const v = localStorage.getItem(key);
-      return v ? { value: v } : null;
-    } catch { return null; }
+// ─── SUPABASE CLIENT ─────────────────────────────────────────────────────────
+const SUPABASE_URL = "https://msqaqhavdkomvqwehqkv.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zcWFxaGF2ZGtvbXZxd2VocWt2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4ODIxNzUsImV4cCI6MjA5NjQ1ODE3NX0.XgNKe1v9B7ua6nAJobEoqEM7i4ItmVcpmeq0GG-3hnw";
+
+const db = {
+  async query(path, options = {}) {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+      headers: {
+        "apikey": SUPABASE_ANON,
+        "Authorization": `Bearer ${SUPABASE_ANON}`,
+        "Content-Type": "application/json",
+        "Prefer": options.prefer || "return=representation",
+        ...options.headers
+      },
+      method: options.method || "GET",
+      body: options.body ? JSON.stringify(options.body) : undefined
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
   },
-  async set(key, value, shared) {
-    try {
-      if (window.storage) return await window.storage.set(key, value, shared);
-      localStorage.setItem(key, value); return { value };
-    } catch { return null; }
+
+  // Get or create user, return user id
+  async upsertUser(name) {
+    // Try insert, ignore conflict
+    await db.query("users", {
+      method: "POST",
+      prefer: "return=minimal",
+      headers: { "Prefer": "return=minimal,resolution=ignore-duplicates" },
+      body: { name }
+    });
+    // Fetch the user
+    const rows = await db.query(`users?name=eq.${encodeURIComponent(name)}&select=id,name`);
+    return rows?.[0] || null;
+  },
+
+  // Load all predictions for a user
+  async loadPredictions(userId) {
+    const rows = await db.query(`predictions?user_id=eq.${userId}&select=match_id,home_score,away_score`);
+    const map = {};
+    (rows || []).forEach(r => { map[r.match_id] = { home: String(r.home_score), away: String(r.away_score) }; });
+    return map;
+  },
+
+  // Save predictions (upsert all at once)
+  async savePredictions(userId, predictions) {
+    const rows = Object.entries(predictions)
+      .filter(([, p]) => p && p.home !== "" && p.away !== "")
+      .map(([matchId, p]) => ({
+        user_id: userId,
+        match_id: matchId,
+        home_score: parseInt(p.home),
+        away_score: parseInt(p.away)
+      }));
+    if (!rows.length) return;
+    await db.query("predictions", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
+      body: rows
+    });
+  },
+
+  // Load leaderboard from view
+  async loadLeaderboard() {
+    return await db.query("leaderboard?select=name,points,predictions_count") || [];
+  },
+
+  // Load all results from matches table
+  async loadResults() {
+    const rows = await db.query("matches?select=id,home_score,away_score&home_score=not.is.null");
+    const map = {};
+    (rows || []).forEach(r => {
+      if (r.home_score != null && r.away_score != null)
+        map[r.id] = { home: String(r.home_score), away: String(r.away_score) };
+    });
+    return map;
+  },
+
+  // Save a single match result
+  async saveResult(matchId, homeScore, awayScore) {
+    await db.query(`matches?id=eq.${matchId}`, {
+      method: "PATCH",
+      prefer: "return=minimal",
+      body: { home_score: parseInt(homeScore), away_score: parseInt(awayScore) }
+    });
+  },
+
+  // Remove user from leaderboard (delete user + cascade predictions)
+  async removeUser(name) {
+    await db.query(`users?name=eq.${encodeURIComponent(name)}`, { method: "DELETE", prefer: "return=minimal" });
   }
 };
 
 
-const ADMIN_PIN = "wc2026SH";
+const ADMIN_PIN = "wc2026admin";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -167,6 +245,7 @@ export default function App() {
 
   // User
   const [userName, setUserName] = useState("");
+  const [userId, setUserId] = useState(null);
   const [nameInput, setNameInput] = useState("");
   const [nameError, setNameError] = useState("");
 
@@ -206,35 +285,35 @@ export default function App() {
     setTimeout(()=>setToast(null),3200);
   }
 
-  // ─── STORAGE ───────────────────────────────────────────────────────────────
-  useEffect(() => {
-    loadGlobal();
-  }, []);
+  // ─── SUPABASE DATA FUNCTIONS ───────────────────────────────────────────────
+  useEffect(() => { loadGlobal(); }, []);
 
   async function loadGlobal() {
     try {
-      const lb = await store.get("wc26_lb", true);
-      if (lb) setLeaderboard(JSON.parse(lb.value));
-    } catch {}
+      const lb = await db.loadLeaderboard();
+      setLeaderboard(lb.map(r => ({ name: r.name, points: r.points || 0, count: r.predictions_count || 0 })));
+    } catch(e) { console.error("loadLeaderboard failed", e); }
     try {
-      const res = await store.get("wc26_results", true);
-      if (res) setResults(JSON.parse(res.value));
-    } catch {}
+      const res = await db.loadResults();
+      setResults(res);
+    } catch(e) { console.error("loadResults failed", e); }
   }
 
   async function loadMyPredictions(name) {
     try {
-      const k = `wc26_p_${name.toLowerCase().replace(/\s+/g,"_")}`;
-      const p = await store.get(k, true);
-      if (p) { setPredictions(JSON.parse(p.value)); setSubmitted(true); }
-    } catch {}
+      const user = await db.upsertUser(name);
+      if (!user) return;
+      setUserId(user.id);
+      const preds = await db.loadPredictions(user.id);
+      if (Object.keys(preds).length > 0) { setPredictions(preds); setSubmitted(true); }
+    } catch(e) { console.error("loadMyPredictions failed", e); }
   }
 
-  function handleSetName() {
+  async function handleSetName() {
     const n = nameInput.trim();
     if (!n || n.length < 2) { setNameError("Enter at least 2 characters"); return; }
     setUserName(n); setNameError("");
-    loadMyPredictions(n);
+    await loadMyPredictions(n);
   }
 
   function setPred(id, side, val) {
@@ -243,30 +322,27 @@ export default function App() {
   }
 
   async function submitPredictions() {
-    const filled = ALL_MATCHES.filter(m => {
-      const p = predictions[m.id];
-      // can only predict unlocked matches
-      if (isPredictionLocked(m.kickoff)) return false;
-      return p && p.home!=="" && p.away!=="";
-    });
-    // also allow predictions for future/null kickoff
     const anyFilled = Object.values(predictions).some(p => p!=null&&p.home!=null&&p.away!=null&&p.home!==""&&p.away!=="");
     if (!anyFilled) { showToast("Fill in at least one score","error"); return; }
+    if (!userId) { showToast("User not found — try re-entering your name","error"); return; }
     setSaving(true);
     try {
-      const k = `wc26_p_${userName.toLowerCase().replace(/\s+/g,"_")}`;
-      await store.set(k, JSON.stringify(predictions), true);
-      const pts = calcPoints(predictions, results);
-      const lb = [...leaderboard];
-      const idx = lb.findIndex(e => e.name.toLowerCase()===userName.toLowerCase());
+      // Filter out locked matches before saving
+      const toSave = {};
+      Object.entries(predictions).forEach(([id, p]) => {
+        const match = ALL_MATCHES.find(m => m.id === id);
+        if (match && isPredictionLocked(match.kickoff)) return;
+        toSave[id] = p;
+      });
+      await db.savePredictions(userId, toSave);
       const total = Object.values(predictions).filter(p=>p!=null&&p.home!=null&&p.away!=null&&p.home!==""&&p.away!=="").length;
-      const entry = {name:userName,points:pts,count:total,submitted:new Date().toISOString()};
-      if (idx>=0) lb[idx]=entry; else lb.push(entry);
-      lb.sort((a,b)=>b.points-a.points);
-      await store.set("wc26_lb", JSON.stringify(lb), true);
-      setLeaderboard(lb); setSubmitted(true);
+      const pts = calcPoints(predictions, results);
+      setSubmitted(true);
+      // Refresh leaderboard
+      const lb = await db.loadLeaderboard();
+      setLeaderboard(lb.map(r => ({ name: r.name, points: r.points || 0, count: r.predictions_count || 0 })));
       showToast(`Saved! ${total} predictions · ${pts} pts so far`);
-    } catch { showToast("Save failed","error"); }
+    } catch(e) { showToast("Save failed — check connection","error"); console.error(e); }
     setSaving(false);
   }
 
@@ -369,6 +445,8 @@ Use exact team names as given. Be precise with scores.`;
         });
         if (match && r.home_score!=null && r.away_score!=null) {
           newResults[match.id] = { home: String(r.home_score), away: String(r.away_score) };
+          // Save to Supabase matches table
+          await db.saveResult(match.id, r.home_score, r.away_score);
           updated++;
           setFetchLog(prev => [...prev,
             `✅ ${match.home} ${r.home_score}–${r.away_score} ${match.away}`
@@ -382,25 +460,12 @@ Use exact team names as given. Be precise with scores.`;
         return;
       }
 
-      // Save results
-      await store.set("wc26_results", JSON.stringify(newResults), true);
       setResults(newResults);
 
-      // Recalculate all leaderboard scores
+      // Refresh leaderboard from Supabase view (auto-calculated)
       setFetchLog(prev => [...prev, `💾 Saved ${updated} result(s). Recalculating leaderboard...`]);
-      const lb = [...leaderboard];
-      const updated_lb = await Promise.all(lb.map(async entry => {
-        try {
-          const k = `wc26_p_${entry.name.toLowerCase().replace(/\s+/g,"_")}`;
-          const p = await store.get(k, true);
-          if (!p) return entry;
-          const preds = JSON.parse(p.value);
-          return {...entry, points: calcPoints(preds, newResults)};
-        } catch { return entry; }
-      }));
-      updated_lb.sort((a,b)=>b.points-a.points);
-      await store.set("wc26_lb", JSON.stringify(updated_lb), true);
-      setLeaderboard(updated_lb);
+      const updated_lb = await db.loadLeaderboard();
+      setLeaderboard(updated_lb.map(r => ({ name: r.name, points: r.points || 0, count: r.predictions_count || 0 })));
       setLastFetched(new Date());
       setFetchLog(prev => [...prev, `🏆 Leaderboard updated for ${updated_lb.length} player(s)!`]);
       showToast(`${updated} result(s) fetched & scores updated`);
@@ -478,7 +543,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
-                }}>PBD Predictor</div>
+                }}>Company Predictor</div>
               </div>
             </div>
 
@@ -933,7 +998,7 @@ Use exact team names as given. Be precise with scores.`;
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.15)",marginTop:14}}>
-                  Default PIN: xxxxx
+                  Default PIN: wc2026admin
                 </p>
               </div>
             ) : (
@@ -1054,8 +1119,8 @@ Use exact team names as given. Be precise with scores.`;
                           <button onClick={async () => {
                             if (!window.confirm(`Remove ${entry.name} from the leaderboard?`)) return;
                             try {
+                              await db.removeUser(entry.name);
                               const updated = leaderboard.filter(e => e.name !== entry.name);
-                              await store.set("wc26_lb", JSON.stringify(updated), true);
                               setLeaderboard(updated);
                               showToast(`${entry.name} removed`);
                             } catch { showToast("Failed to remove","error"); }
@@ -1122,7 +1187,8 @@ Use exact team names as given. Be precise with scores.`;
                             onChange={async e => {
                               const newR = {...results,[match.id]:{...(results[match.id]||{}),home:e.target.value}};
                               setResults(newR);
-                              await store.set("wc26_results",JSON.stringify(newR),true);
+                              if (e.target.value !== "" && results[match.id]?.away !== "")
+                                await db.saveResult(match.id, e.target.value, results[match.id]?.away || 0);
                             }}
                             placeholder="-"
                             style={{
@@ -1139,7 +1205,8 @@ Use exact team names as given. Be precise with scores.`;
                             onChange={async e => {
                               const newR = {...results,[match.id]:{...(results[match.id]||{}),away:e.target.value}};
                               setResults(newR);
-                              await store.set("wc26_results",JSON.stringify(newR),true);
+                              if (e.target.value !== "" && results[match.id]?.home !== "")
+                                await db.saveResult(match.id, results[match.id]?.home || 0, e.target.value);
                             }}
                             placeholder="-"
                             style={{
@@ -1162,20 +1229,18 @@ Use exact team names as given. Be precise with scores.`;
                   <button onClick={async () => {
                     setSaving(true);
                     try {
-                      await store.set("wc26_results",JSON.stringify(results),true);
-                      const lb=[...leaderboard];
-                      const updated=await Promise.all(lb.map(async entry=>{
-                        try {
-                          const k=`wc26_p_${entry.name.toLowerCase().replace(/\s+/g,"_")}`;
-                          const p=await store.get(k,true);
-                          if(!p) return entry;
-                          return {...entry,points:calcPoints(JSON.parse(p.value),results)};
-                        } catch { return entry; }
-                      }));
-                      updated.sort((a,b)=>b.points-a.points);
-                      await store.set("wc26_lb",JSON.stringify(updated),true);
-                      setLeaderboard(updated);
-                      showToast("Scores saved & leaderboard recalculated");
+                      // Save all current results to Supabase
+                      await Promise.all(
+                        Object.entries(results).map(([matchId, r]) =>
+                          r.home !== "" && r.away !== ""
+                            ? db.saveResult(matchId, r.home, r.away)
+                            : Promise.resolve()
+                        )
+                      );
+                      // Refresh leaderboard from Supabase view
+                      const updated = await db.loadLeaderboard();
+                      setLeaderboard(updated.map(r => ({ name: r.name, points: r.points || 0, count: r.predictions_count || 0 })));
+                      showToast("Results saved & leaderboard recalculated");
                     } catch { showToast("Save failed","error"); }
                     setSaving(false);
                   }} disabled={saving} style={{
