@@ -382,8 +382,13 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
 
-  // Ticker for countdown timers
-  const [tick, setTick] = useState(0);
+  // Screen width tracker for side panels
+  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
+  useEffect(() => {
+    const handleResize = () => setIsWideScreen(window.innerWidth > 1200);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
   useEffect(() => {
     const t = setInterval(() => setTick(n => n+1), 30000);
     return () => clearInterval(t);
@@ -654,45 +659,47 @@ Use exact team names as given. Be precise with scores.`;
       position:"relative",
       overflowX:"hidden"
     }}>
-      {/* ── LEFT IMAGE HOLDER ── */}
+      {/* ── LEFT IMAGE HOLDER — hidden on screens narrower than 1200px ── */}
+      {isWideScreen && (
       <div style={{
         position:"fixed",
         left:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:300,
+        width:200,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
-        {/* Replace the src below with your image URL — recommended size: 200 x 500 px */}
         <img
-          src="/Left.jpg"
+          src="https://placehold.co/200x500/1c76bc/ffffff?text=200+x+500"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
+      )}
 
-      {/* ── RIGHT IMAGE HOLDER ── */}
+      {/* ── RIGHT IMAGE HOLDER — hidden on screens narrower than 1200px ── */}
+      {isWideScreen && (
       <div style={{
         position:"fixed",
         right:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:300,
+        width:200,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
-        {/* Replace the src below with your image URL — recommended size: 200 x 500 px */}
         <img
-          src="/Right.jpg"
+          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
+      )}
 
       {/* Diagonal pitch lines */}
       <div style={{
@@ -1758,7 +1765,7 @@ Use exact team names as given. Be precise with scores.`;
         input[type=number]{-moz-appearance:textfield}
         *{box-sizing:border-box}
         .side-panel { display: block; }
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
           .side-panel { display: none; }
         }
       `}</style>
