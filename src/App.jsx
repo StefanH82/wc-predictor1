@@ -1756,7 +1756,10 @@ Use exact team names as given. Be precise with scores.`;
         input[type=number]::-webkit-inner-spin-button,
         input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
-        *{box-sizing:border-box}
+        *{box-sizing:border-box}.side-panel { display: block; }
+        @media (max-width: 1200px) {
+          .side-panel { display: none; }
+        }
       `}</style>
     </div>
   );
