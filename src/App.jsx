@@ -159,7 +159,7 @@ const store = {
 };
 
 
-const ADMIN_PIN = "wc2026SH";
+const ADMIN_PIN = "wc2026admin";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -478,7 +478,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#c9a227",
                   textTransform:"uppercase",marginTop:1
-                }}>Premium brands distributors Predictor</div>
+                }}>Company Predictor</div>
               </div>
             </div>
 
@@ -1012,6 +1012,63 @@ Use exact team names as given. Be precise with scores.`;
                             :line.startsWith("🏆")?"#c9a227"
                             :"rgba(255,255,255,0.45)"
                         }}>{line}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── USER MANAGEMENT ── */}
+                <div style={{
+                  background:"rgba(239,68,68,0.05)",
+                  border:"1px solid rgba(239,68,68,0.15)",
+                  borderRadius:14,padding:"16px 20px",marginBottom:20
+                }}>
+                  <div style={{fontSize:13,fontWeight:700,color:"#f87171",marginBottom:12}}>
+                    👥 Manage Players
+                  </div>
+                  {leaderboard.length === 0 ? (
+                    <div style={{fontSize:12,color:"rgba(255,255,255,0.25)",textAlign:"center",padding:"12px 0"}}>
+                      No players yet
+                    </div>
+                  ) : (
+                    <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                      {leaderboard.map((entry, i) => (
+                        <div key={entry.name} style={{
+                          display:"flex",alignItems:"center",gap:10,
+                          background:"rgba(255,255,255,0.03)",
+                          border:"1px solid rgba(255,255,255,0.07)",
+                          borderRadius:8,padding:"8px 12px"
+                        }}>
+                          <div style={{
+                            width:28,height:28,borderRadius:"50%",flexShrink:0,
+                            background:"rgba(255,255,255,0.08)",
+                            display:"flex",alignItems:"center",justifyContent:"center",
+                            fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.4)"
+                          }}>{getInitials(entry.name)}</div>
+                          <div style={{flex:1}}>
+                            <div style={{fontSize:12,color:"#c8d8e8"}}>{entry.name}</div>
+                            <div style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
+                              {entry.points} pts · {entry.count||0} predictions
+                            </div>
+                          </div>
+                          <button onClick={async () => {
+                            if (!window.confirm(`Remove ${entry.name} from the leaderboard?`)) return;
+                            try {
+                              const updated = leaderboard.filter(e => e.name !== entry.name);
+                              await store.set("wc26_lb", JSON.stringify(updated), true);
+                              setLeaderboard(updated);
+                              showToast(`${entry.name} removed`);
+                            } catch { showToast("Failed to remove","error"); }
+                          }} style={{
+                            padding:"5px 12px",
+                            background:"rgba(239,68,68,0.12)",
+                            border:"1px solid rgba(239,68,68,0.25)",
+                            borderRadius:6,color:"#f87171",
+                            fontSize:11,fontWeight:700,
+                            cursor:"pointer",fontFamily:"inherit",
+                            flexShrink:0
+                          }}>Remove</button>
+                        </div>
                       ))}
                     </div>
                   )}
