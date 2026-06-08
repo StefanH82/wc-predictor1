@@ -647,7 +647,7 @@ Use exact team names as given. Be precise with scores.`;
                   letterSpacing:0.5,lineHeight:1.1
                 }}>World Cup 2026</div>
                 <div style={{
-                  fontsize:12,letterSpacing:4,color:"#a2ceec",
+                  fontSize:12,letterSpacing:4,color:"#a2ceec",
                   textTransform:"uppercase",marginTop:1
                 }}>PBD Predictor</div>
               </div>
@@ -675,10 +675,10 @@ Use exact team names as given. Be precise with scores.`;
                     width:26,height:26,borderRadius:"50%",
                     background:"linear-gradient(135deg,#1c76bc,#1c76bc)",
                     display:"flex",alignItems:"center",justifyContent:"center",
-                    fontsize:12,fontWeight:800,color:"#000"
+                    fontSize:12,fontWeight:800,color:"#000"
                   }}>{getInitials(userName)}</div>
                   <span style={{fontSize:12,color:"#a2ceec",fontWeight:600}}>{userName}</span>
-                  {submitted && <span style={{fontsize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
+                  {submitted && <span style={{fontSize:12,color:"rgba(28,118,188,0.5)"}}>{totalPreds}</span>}
                 </div>
                 <button onClick={handleLogout} style={{
                   background:"rgba(255,255,255,0.05)",
@@ -702,7 +702,7 @@ Use exact team names as given. Be precise with scores.`;
               <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="leaderboard")loadGlobal();}} style={{
                 padding:"10px 20px",background:"none",border:"none",
                 cursor:"pointer",fontFamily:"inherit",
-                fontsize:15,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",
+                fontSize:15,fontWeight:600,letterSpacing:1.2,textTransform:"uppercase",
                 color:tab===t.id?"#a2ceec":"rgba(255,255,255,0.28)",
                 borderBottom:tab===t.id?"2px solid #1c76bc":"2px solid transparent",
                 marginBottom:-1,transition:"all 0.15s"
@@ -730,7 +730,7 @@ Use exact team names as given. Be precise with scores.`;
                 <h2 style={{margin:"0 0 4px",fontSize:20,color:"#fff",fontWeight:700}}>
                   FIFA World Cup 2026
                 </h2>
-                <p style={{margin:0,fontsize:15,color:"rgba(255,255,255,0.3)"}}>
+                <p style={{margin:0,fontSize:15,color:"rgba(255,255,255,0.3)"}}>
                   USA · Canada · Mexico · Jun 11 – Jul 19
                 </p>
               </div>
@@ -831,7 +831,7 @@ Use exact team names as given. Be precise with scores.`;
               </button>
 
               {/* Switch mode hint */}
-              <p style={{textAlign:"center",marginTop:16,fontsize:15,color:"rgba(255,255,255,0.2)"}}>
+              <p style={{textAlign:"center",marginTop:16,fontSize:15,color:"rgba(255,255,255,0.2)"}}>
                 {authMode==="login"
                   ? <>No account? <span onClick={()=>{setAuthMode("register");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Register here</span></>
                   : <>Already registered? <span onClick={()=>{setAuthMode("login");setAuthError("");}} style={{color:"#a2ceec",cursor:"pointer",textDecoration:"underline"}}>Log in</span></>
@@ -856,7 +856,7 @@ Use exact team names as given. Be precise with scores.`;
                   border:"1px solid rgba(74,222,128,0.18)",
                   borderRadius:9,padding:"9px 14px",
                   display:"flex",alignItems:"center",gap:8,
-                  fontsize:15,color:"rgba(74,222,128,0.8)"
+                  fontSize:15,color:"rgba(74,222,128,0.8)"
                 }}>
                   <span>✓</span>
                   <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in grey</span>
@@ -881,11 +881,11 @@ Use exact team names as given. Be precise with scores.`;
                       background:activeGroup===g?"rgba(28,118,188,0.18)":"transparent",
                       border:activeGroup===g?"1px solid rgba(28,118,188,0.35)":"1px solid transparent",
                       color:activeGroup===g?"#a2ceec":done?"rgba(255,255,255,0.45)":"rgba(255,255,255,0.25)",
-                      fontsize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
+                      fontSize:15,fontWeight:600,cursor:"pointer",fontFamily:"inherit",
                       display:"flex",alignItems:"center",gap:3
                     }}>
                       {g==="KO"?"KO":g}
-                      {done&&<span style={{color:"#4ade80",fontsize:15}}>✓</span>}
+                      {done&&<span style={{color:"#4ade80",fontSize:15}}>✓</span>}
                       {hasLive&&<span style={{color:"#fbbf24",fontSize:7}}>●</span>}
                     </button>
                   );
@@ -939,22 +939,22 @@ Use exact team names as given. Be precise with scores.`;
                       {/* Date / lock state */}
                       <div style={{minWidth:60,textAlign:"center",flexShrink:0}}>
                         {hasResult ? (
-                          <div style={{fontsize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
+                          <div style={{fontSize:15,color:"rgba(255,255,255,0.25)",fontWeight:600}}>FT</div>
                         ) : locked ? (
-                          <div style={{fontsize:12,color:"#fbbf24"}}>🔒</div>
+                          <div style={{fontSize:12,color:"#fbbf24"}}>🔒</div>
                         ) : deadline ? (
-                          <div style={{fontsize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
+                          <div style={{fontSize:15,color:"#fbbf24",fontWeight:600}}>{deadline}</div>
                         ) : match.kickoff ? (
-                          <div style={{fontsize:15,color:"rgba(255,255,255,0.22)"}}>
+                          <div style={{fontSize:15,color:"rgba(255,255,255,0.22)"}}>
                             {fmtDate(match.kickoff)}<br/>
                             {fmtTime(match.kickoff)}
                           </div>
                         ) : (
-                          <div style={{fontsize:15,color:"rgba(255,255,255,0.18)"}}>TBD</div>
+                          <div style={{fontSize:15,color:"rgba(255,255,255,0.18)"}}>TBD</div>
                         )}
                         {ptsBadge && (
                           <div style={{
-                            marginTop:3,fontsize:12,fontWeight:700,
+                            marginTop:3,fontSize:12,fontWeight:700,
                             color:ptsBadge.c,background:ptsBadge.b,
                             borderRadius:4,padding:"1px 5px",display:"inline-block"
                           }}>{ptsBadge.v}</div>
@@ -963,17 +963,17 @@ Use exact team names as given. Be precise with scores.`;
 
                       {/* Home team */}
                       <span style={{
-                        flex:1,fontsize:15,textAlign:"right",
+                        flex:1,fontSize:15,textAlign:"right",
                         color: locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.home)}</span>
 
                       {/* Score inputs */}
-                      <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0,pointerEvents:locked?"none":"auto"}}>
                         <input type="number" min={0} max={99}
                           value={pred.home}
-                          onChange={e=>!locked&&setPred(match.id,"home",e.target.value)}
-                          readOnly={locked}
+                          onChange={e => { if (!locked) setPred(match.id,"home",e.target.value); }}
+                          onKeyDown={e => { if (locked) e.preventDefault(); }}
                           placeholder="-"
                           style={{
                             width:34,height:32,textAlign:"center",
@@ -987,10 +987,11 @@ Use exact team names as given. Be precise with scores.`;
                             cursor:locked?"not-allowed":"text"
                           }}
                         />
-                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:10,fontWeight:300}}>:</span>
+                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:10,fontWeight:300,pointerEvents:locked?"none":"auto"}}>:</span>
                         <input type="number" min={0} max={99}
                           value={pred.away}
-                          onChange={e=>!locked&&setPred(match.id,"away",e.target.value)}
+                          onChange={e => { if (!locked) setPred(match.id,"away",e.target.value); }}
+                          onKeyDown={e => { if (locked) e.preventDefault(); }}
                           readOnly={locked}
                           placeholder="-"
                           style={{
@@ -1009,7 +1010,7 @@ Use exact team names as given. Be precise with scores.`;
 
                       {/* Away team */}
                       <span style={{
-                        flex:1,fontsize:15,
+                        flex:1,fontSize:15,
                         color:locked?"rgba(255,255,255,0.35)":"#e8f2fb",
                         lineHeight:1.3,fontWeight:500
                       }}>{tf(match.away)}</span>
@@ -1027,7 +1028,7 @@ Use exact team names as given. Be precise with scores.`;
                       )}
                       {locked && !hasResult && (
                         <div style={{
-                          fontsize:12,color:"rgba(251,191,36,0.5)",
+                          fontSize:12,color:"rgba(251,191,36,0.5)",
                           minWidth:40,textAlign:"center",flexShrink:0
                         }}>Pending</div>
                       )}
@@ -1047,7 +1048,7 @@ Use exact team names as given. Be precise with scores.`;
                   fontFamily:"inherit",letterSpacing:0.5,
                   boxShadow:"0 4px 20px rgba(28,118,188,0.3)"
                 }}>{saving?"Saving…":submitted?"Update Predictions":"Submit Predictions"}</button>
-                <span style={{fontsize:15,color:"rgba(255,255,255,0.2)"}}>
+                <span style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
                   {totalPreds} / 104 filled
                 </span>
               </div>
@@ -1129,10 +1130,10 @@ Use exact team names as given. Be precise with scores.`;
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
-                            {entry.name} {isMe&&<span style={{fontsize:12,opacity:0.4}}>(you)</span>}
+                            {entry.name} {isMe&&<span style={{fontSize:12,opacity:0.4}}>(you)</span>}
                           </div>
                           {entry.count&&(
-                            <div style={{fontsize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
+                            <div style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginTop:1}}>
                               {entry.count} predictions
                             </div>
                           )}
@@ -1142,7 +1143,7 @@ Use exact team names as given. Be precise with scores.`;
                             fontSize:22,fontWeight:700,
                             color:i===0?"#a2ceec":i<3?"#e8f2fb":"rgba(255,255,255,0.35)"
                           }}>{entry.points}</span>
-                          <span style={{fontsize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
+                          <span style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginLeft:3}}>pts</span>
                         </div>
                       </div>
                     </div>
@@ -1200,7 +1201,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
                   <div>
                     <h2 style={{margin:"0 0 2px",fontSize:16,color:"#fff"}}>Admin Panel</h2>
-                    <p style={{margin:0,fontsize:15,color:"rgba(255,255,255,0.3)"}}>
+                    <p style={{margin:0,fontSize:15,color:"rgba(255,255,255,0.3)"}}>
                       Fetch results via AI web search · Manually override below
                     </p>
                   </div>
@@ -1223,7 +1224,7 @@ Use exact team names as given. Be precise with scores.`;
                       <div style={{fontSize:13,fontWeight:700,color:"#a2ceec",marginBottom:4}}>
                         🤖 Auto-Fetch Results
                       </div>
-                      <div style={{fontsize:15,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>
+                      <div style={{fontSize:15,color:"rgba(255,255,255,0.35)",lineHeight:1.5}}>
                         Searches the web for today's & recent World Cup 2026 results,<br/>
                         parses scores automatically and updates the leaderboard.
                       </div>
@@ -1261,7 +1262,7 @@ Use exact team names as given. Be precise with scores.`;
                       background:"rgba(0,0,0,0.3)",
                       border:"1px solid rgba(255,255,255,0.06)",
                       borderRadius:8,padding:"12px 14px",
-                      fontFamily:"monospace",fontsize:15,
+                      fontFamily:"monospace",fontSize:15,
                       display:"flex",flexDirection:"column",gap:4
                     }}>
                       {fetchLog.map((line,i) => (
@@ -1323,7 +1324,7 @@ Use exact team names as given. Be precise with scores.`;
                             background:"rgba(239,68,68,0.12)",
                             border:"1px solid rgba(239,68,68,0.25)",
                             borderRadius:6,color:"#f87171",
-                            fontsize:15,fontWeight:700,
+                            fontSize:15,fontWeight:700,
                             cursor:"pointer",fontFamily:"inherit",
                             flexShrink:0
                           }}>Remove</button>
@@ -1366,16 +1367,16 @@ Use exact team names as given. Be precise with scores.`;
                       }}>
                         <div style={{minWidth:52,textAlign:"center"}}>
                           {match.kickoff&&(
-                            <div style={{fontsize:15,color:"rgba(255,255,255,0.2)"}}>
+                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
                               {fmtDate(match.kickoff)}<br/>
                               {fmtTime(match.kickoff)}
                             </div>
                           )}
                           {r.home!==""&&r.away!==""&&(
-                            <div style={{fontsize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
+                            <div style={{fontSize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
                           )}
                         </div>
-                        <span style={{flex:1,fontsize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
+                        <span style={{flex:1,fontSize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
                         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                           <input type="number" min={0} max={99}
                             value={r.home}
@@ -1413,7 +1414,7 @@ Use exact team names as given. Be precise with scores.`;
                             }}
                           />
                         </div>
-                        <span style={{flex:1,fontsize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
+                        <span style={{flex:1,fontSize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
                       </div>
                     );
                   })}
