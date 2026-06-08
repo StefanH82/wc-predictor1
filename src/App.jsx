@@ -1109,9 +1109,9 @@ Use exact team names as given. Be precise with scores.`;
               background:"rgba(255,255,255,0.025)",borderRadius:8,flexWrap:"wrap"
             }}>
               {[
-                {pts:"+3",label:"Exact score",c:"#1c76bc"},
-                {pts:"+1",label:"Correct result",c:"#60a5fa"},
-                {pts:"312",label:"Max pts",c:"rgba(255,255,255,0.5)"}
+                {pts:"+10",label:"Exact score",c:"#1c76bc"},
+                {pts:"+5",label:"Correct result",c:"#60a5fa"},
+                {pts:"1040",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
                 <span key={label} style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
                   <span style={{color:c,fontWeight:700}}>{pts}</span> {label}
