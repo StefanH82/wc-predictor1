@@ -960,7 +960,7 @@ Use exact team names as given. Be precise with scores.`;
                   fontSize:15,color:"rgba(74,222,128,0.8)"
                 }}>
                   <span>✓</span>
-                  <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in grey</span>
+                  <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in red</span>
                 </div>
               )}
 
