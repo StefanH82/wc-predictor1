@@ -159,7 +159,7 @@ const store = {
 };
 
 
-const ADMIN_PIN = "wc2026admin";
+const ADMIN_PIN = "wc2026SH";
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -446,7 +446,7 @@ Use exact team names as given. Be precise with scores.`;
       {/* Gold top accent */}
       <div style={{
         position:"fixed",top:0,left:0,right:0,height:2,zIndex:100,
-        background:"linear-gradient(90deg,transparent,#c9a227 30%,#f5d060 50%,#c9a227 70%,transparent)"
+        background:"linear-gradient(90deg,transparent,#292562 30%,#6E67C5 50%,#ADAADF 70%,transparent)"
       }}/>
 
       {/* ── HEADER ── */}
@@ -478,7 +478,7 @@ Use exact team names as given. Be precise with scores.`;
                 <div style={{
                   fontSize:9,letterSpacing:4,color:"#c9a227",
                   textTransform:"uppercase",marginTop:1
-                }}>Company Predictor</div>
+                }}>PBD Predictor</div>
               </div>
             </div>
 
@@ -933,7 +933,7 @@ Use exact team names as given. Be precise with scores.`;
                   color:"#000",fontWeight:800,fontSize:13,cursor:"pointer",fontFamily:"inherit"
                 }}>Unlock</button>
                 <p style={{fontSize:10,color:"rgba(255,255,255,0.15)",marginTop:14}}>
-                  Default PIN: wc2026admin
+                  Default PIN: xxxxxx
                 </p>
               </div>
             ) : (
