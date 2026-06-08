@@ -272,11 +272,21 @@ const db = {
         away_score: parseInt(p.away)
       }));
     if (!rows.length) return;
-    await db.query("predictions", {
+    // Use fetch directly to ensure correct Prefer header for upsert
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/predictions`, {
       method: "POST",
-      headers: { "Prefer": "resolution=merge-duplicates,return=minimal" },
-      body: rows
+      headers: {
+        "apikey": SUPABASE_ANON,
+        "Authorization": `Bearer ${SUPABASE_ANON}`,
+        "Content-Type": "application/json",
+        "Prefer": "resolution=merge-duplicates,return=minimal"
+      },
+      body: JSON.stringify(rows)
     });
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(err);
+    }
   },
 
   // Load leaderboard from view
