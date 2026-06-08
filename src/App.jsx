@@ -666,16 +666,16 @@ Use exact team names as given. Be precise with scores.`;
         left:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:200,
+        width:300,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
         <img
-          src="https://placehold.co/200x500/1c76bc/ffffff?text=200+x+500"
+          src="/Left.jpg"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
         />
       </div>
       )}
@@ -687,16 +687,16 @@ Use exact team names as given. Be precise with scores.`;
         right:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:200,
+        width:300,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
         <img
-          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
+          src="/Right.jpg"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
         />
       </div>
       )}
