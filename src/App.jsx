@@ -1054,13 +1054,13 @@ Use exact team names as given. Be precise with scores.`;
                       background:locked
                         ? hasResult
                           ? "rgba(255,255,255,0.025)"
-                          : "rgba(255,200,0,0.03)"
+                          : "rgba(239,68,68,0.06)"
                         : hasPred
                           ? "rgba(28,118,188,0.05)"
                           : "rgba(255,255,255,0.02)",
                       border:`1px solid ${
                         locked && hasResult ? "rgba(255,255,255,0.06)"
-                        : locked ? "rgba(251,191,36,0.15)"
+                        : locked ? "rgba(239,68,68,0.25)"
                         : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
                       borderRadius:9,padding:"9px 12px",
