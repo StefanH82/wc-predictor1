@@ -762,7 +762,7 @@ Use exact team names as given. Be precise with scores.`;
                   value={nameInput}
                   onChange={e=>{setNameInput(e.target.value);setAuthError("");}}
                   onKeyDown={e=>e.key==="Enter"&&(authMode==="login"?handleLogin():handleRegister())}
-                  placeholder="Your name"
+                  placeholder="Your name & surname"
                   style={{
                     padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
