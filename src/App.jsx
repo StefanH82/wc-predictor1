@@ -631,7 +631,7 @@ Use exact team names as given. Be precise with scores.`;
               <div style={{display:"flex",gap:8}}>
                 <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
                   onKeyDown={e=>e.key==="Enter"&&handleSetName()}
-                  placeholder="Enter your name"
+                  placeholder="Enter your name & surname"
                   style={{
                     flex:1,padding:"11px 14px",
                     background:"rgba(255,255,255,0.07)",
