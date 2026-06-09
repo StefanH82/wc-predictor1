@@ -385,6 +385,8 @@ export default function App() {
   // Screen width tracker for side panels
   const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
   const [statsSection, setStatsSection] = useState("rankings");
+  const [probabilities, setProbabilities] = useState({}); // { matchId: {home, draw, away, fetched} }
+  const [fetchingProbs, setFetchingProbs] = useState(false);
   useEffect(() => {
     const handleResize = () => setIsWideScreen(window.innerWidth > 1200);
     window.addEventListener("resize", handleResize);
@@ -618,6 +620,62 @@ Use exact team names as given. Be precise with scores.`;
     setFetching(false);
   }
 
+  // ─── FETCH WIN PROBABILITIES VIA AI ────────────────────────────────────────
+  async function fetchProbabilities(matchList) {
+    if (fetchingProbs) return;
+    setFetchingProbs(true);
+    const today = new Date().toLocaleDateString("en-GB",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+    const matchLines = matchList
+      .filter(m => !isPredictionLocked(m.kickoff) || !results[m.id])
+      .map(m => `${m.id}: ${m.home} vs ${m.away}`)
+      .join("\n");
+
+    if (!matchLines.trim()) { setFetchingProbs(false); return; }
+
+    try {
+      const prompt = `Today is ${today}.
+
+Search the web for the latest FIFA World Cup 2026 win probability predictions for these upcoming matches:
+${matchLines}
+
+For each match return the win probability percentages. Return ONLY a JSON array, no markdown, no explanation:
+[{"id":"matchId","home_pct":67,"draw_pct":21,"away_pct":12},...]
+
+Percentages must add up to 100. Use your best estimate based on FIFA rankings and recent form if no specific odds found.`;
+
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:2000,
+          tools:[{type:"web_search_20250305",name:"web_search"}],
+          messages:[{role:"user",content:prompt}]
+        })
+      });
+      const data = await response.json();
+      const text = (data.content?.filter(b=>b.type==="text").map(b=>b.text)||[]).join("\n");
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        const newProbs = {...probabilities};
+        parsed.forEach(p => {
+          if (p.id && p.home_pct != null) {
+            newProbs[p.id] = {
+              home: Math.round(p.home_pct),
+              draw: Math.round(p.draw_pct),
+              away: Math.round(p.away_pct),
+              fetched: new Date().toLocaleTimeString()
+            };
+          }
+        });
+        setProbabilities(newProbs);
+        showToast(`Win probabilities updated for ${parsed.length} match(es)`);
+      }
+    } catch(e) { showToast("Failed to fetch probabilities","error"); }
+    setFetchingProbs(false);
+  }
+
   // ─── DISPLAY HELPERS ───────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState("group"); // "group" | "date"
 
@@ -676,7 +734,7 @@ Use exact team names as given. Be precise with scores.`;
         <img
           src="/Left.jpg"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"Fill",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
       )}
@@ -697,7 +755,7 @@ Use exact team names as given. Be precise with scores.`;
         <img
           src="/image-4202271-1.png"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"Fill",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
       )}
@@ -793,7 +851,7 @@ Use exact team names as given. Be precise with scores.`;
           </div>
 
           {/* Nav tabs */}
-          <div style={{display:"flex",gap:0,justifyContent:"center"}}>
+          <div style={{display:"flex",gap:0}}>
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
@@ -964,13 +1022,25 @@ Use exact team names as given. Be precise with scores.`;
                 </div>
               )}
 
-              {/* View toggle */}
+              {/* View toggle + probability fetch */}
               <div style={{
                 display:"flex",alignItems:"center",justifyContent:"space-between",
-                margin:"14px 0 0"
+                margin:"14px 0 0",flexWrap:"wrap",gap:8
               }}>
-                <div style={{fontSize:15,color:"rgba(255,255,255,0.25)"}}>
-                  {viewMode==="group" ? "Showing by group" : "Showing by date"}
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.25)"}}>
+                    {viewMode==="group" ? "Showing by group" : "Showing by date"}
+                  </div>
+                  <button onClick={()=>fetchProbabilities(activeMatchList)} disabled={fetchingProbs} style={{
+                    padding:"4px 10px",
+                    background:fetchingProbs?"rgba(28,118,188,0.1)":"rgba(28,118,188,0.15)",
+                    border:"1px solid rgba(28,118,188,0.3)",
+                    borderRadius:20,color:fetchingProbs?"rgba(162,206,236,0.4)":"#a2ceec",
+                    fontSize:10,fontWeight:600,cursor:fetchingProbs?"not-allowed":"pointer",
+                    fontFamily:"inherit"
+                  }}>
+                    {fetchingProbs?"⏳ Fetching…":"📊 Get Win Odds"}
+                  </button>
                 </div>
                 <div style={{
                   display:"flex",
@@ -1051,7 +1121,8 @@ Use exact team names as given. Be precise with scores.`;
                   }
 
                   return (
-                    <div key={match.id} style={{
+                    <div key={match.id} style={{borderRadius:9,overflow:"hidden",marginBottom:0}}>
+                    <div style={{
                       background:locked
                         ? hasResult
                           ? "rgba(255,255,255,0.025)"
@@ -1064,7 +1135,8 @@ Use exact team names as given. Be precise with scores.`;
                         : locked ? "rgba(251,191,36,0.15)"
                         : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
-                      borderRadius:9,padding:"9px 12px",
+                      borderRadius: probabilities[match.id] && !hasResult ? "9px 9px 0 0" : 9,
+                      padding:"9px 12px",
                       display:"flex",alignItems:"center",gap:8,
                       opacity: locked && !hasResult ? 0.6 : 1
                     }}>
@@ -1166,6 +1238,34 @@ Use exact team names as given. Be precise with scores.`;
                         }}>Pending</div>
                       )}
                     </div>
+                    {/* Win probability bar */}
+                    {probabilities[match.id] && !hasResult && (() => {
+                      const prob = probabilities[match.id];
+                      return (
+                        <div style={{
+                          padding:"6px 12px 8px",
+                          background:"rgba(0,0,0,0.15)",
+                          borderTop:"1px solid rgba(255,255,255,0.04)",
+                          borderRadius:"0 0 9px 9px",
+                          marginTop:-4
+                        }}>
+                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+                            <span style={{fontSize:10,fontWeight:700,color:"#a2ceec"}}>{prob.home}%</span>
+                            <span style={{fontSize:9,color:"rgba(255,255,255,0.3)"}}>Draw {prob.draw}%</span>
+                            <span style={{fontSize:10,fontWeight:700,color:"#a2ceec"}}>{prob.away}%</span>
+                          </div>
+                          <div style={{display:"flex",height:4,borderRadius:2,overflow:"hidden",gap:1}}>
+                            <div style={{width:`${prob.home}%`,background:"#1c76bc",borderRadius:"2px 0 0 2px"}}/>
+                            <div style={{width:`${prob.draw}%`,background:"rgba(255,255,255,0.2)"}}/>
+                            <div style={{width:`${prob.away}%`,background:"#292562",borderRadius:"0 2px 2px 0"}}/>
+                          </div>
+                          <div style={{fontSize:8,color:"rgba(255,255,255,0.18)",marginTop:4,textAlign:"right"}}>
+                            odds · {prob.fetched}
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
                   );
                 })}
               </div>
@@ -1819,7 +1919,7 @@ Use exact team names as given. Be precise with scores.`;
             {rank:24,team:"Türkiye",flag:"🇹🇷",pts:1578,change:"—"},
             {rank:25,team:"Australia",flag:"🇦🇺",pts:1563,change:"—"},
             {rank:26,team:"Norway",flag:"🇳🇴",pts:1548,change:"—"},
-            {rank:27,team:"Sweden",flag:"🇺🇦",pts:1534,change:"—"},
+            {rank:27,team:"Ukraine",flag:"🇺🇦",pts:1534,change:"—"},
             {rank:28,team:"Canada",flag:"🇨🇦",pts:1521,change:"▼2"},
             {rank:29,team:"Algeria",flag:"🇩🇿",pts:1509,change:"—"},
             {rank:30,team:"Panama",flag:"🇵🇦",pts:1498,change:"—"},
@@ -1926,7 +2026,7 @@ Use exact team names as given. Be precise with scores.`;
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:3}}>
                     {FIFA_RANKINGS.map((r,i) => {
-                      const isInWC = ["France","Spain","Argentina","England","Portugal","Brazil","Netherlands","Morocco","Belgium","Germany","Croatia","Colombia","Senegal","Mexico","USA","Uruguay","Japan","Switzerland","South Korea","Ecuador","Austria","Türkiye","Australia","Norway","Sweden","Canada","Algeria","Panama","Egypt","Scotland","Paraguay","Tunisia","Ivory Coast","Bosnia & Herzegovina","Czech Republic","Iraq","Saudi Arabia","Iran","Ghana","Jordan","Cape Verde","New Zealand","Qatar","South Africa","Uzbekistan","Haiti","Curaçao","DR Congo","Czechia"].includes(r.team);
+                      const isInWC = ["France","Spain","Argentina","England","Portugal","Brazil","Netherlands","Morocco","Belgium","Germany","Croatia","Colombia","Senegal","Mexico","USA","Uruguay","Japan","Switzerland","South Korea","Ecuador","Austria","Türkiye","Australia","Norway","Ukraine","Canada","Algeria","Panama","Egypt","Scotland","Paraguay","Tunisia","Ivory Coast","Bosnia & Herzegovina","Czech Republic","Iraq","Saudi Arabia","Iran","Ghana","Jordan","Cape Verde","New Zealand","Qatar","South Africa","Uzbekistan","Haiti","Curaçao","DR Congo","Czechia"].includes(r.team);
                       return (
                         <div key={r.rank} style={{
                           display:"grid",
