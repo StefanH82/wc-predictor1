@@ -667,16 +667,16 @@ Use exact team names as given. Be precise with scores.`;
         left:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:300,
+        width:200,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
         <img
-          src="/Left.jpg"
+          src="https://placehold.co/200x500/1c76bc/ffffff?text=200+x+500"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
       )}
@@ -688,16 +688,16 @@ Use exact team names as given. Be precise with scores.`;
         right:0,
         top:"50%",
         transform:"translateY(-50%)",
-        width:300,
+        width:200,
         height:500,
         zIndex:5,
         pointerEvents:"none",
         overflow:"hidden"
       }}>
         <img
-          src="/Right.jpg"
+          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
       </div>
       )}
@@ -793,7 +793,7 @@ Use exact team names as given. Be precise with scores.`;
           </div>
 
           {/* Nav tabs */}
-          <div style={{display:"flex",gap:0,justifyContent:"Center"}}>
+          <div style={{display:"flex",gap:0}}>
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
@@ -960,7 +960,7 @@ Use exact team names as given. Be precise with scores.`;
                   fontSize:15,color:"rgba(74,222,128,0.8)"
                 }}>
                   <span>✓</span>
-                  <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in red</span>
+                  <span>{totalPreds} predictions saved · {calcPoints(predictions,results)} pts so far · Locked matches shown in grey</span>
                 </div>
               )}
 
@@ -1055,13 +1055,13 @@ Use exact team names as given. Be precise with scores.`;
                       background:locked
                         ? hasResult
                           ? "rgba(255,255,255,0.025)"
-                          : "rgba(239,68,68,0.06)"
+                          : "rgba(255,200,0,0.03)"
                         : hasPred
                           ? "rgba(28,118,188,0.05)"
                           : "rgba(255,255,255,0.02)",
                       border:`1px solid ${
                         locked && hasResult ? "rgba(255,255,255,0.06)"
-                        : locked ? "rgba(239,68,68,0.25)"
+                        : locked ? "rgba(251,191,36,0.15)"
                         : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
                       borderRadius:9,padding:"9px 12px",
@@ -1650,64 +1650,109 @@ Use exact team names as given. Be precise with scores.`;
 
                 <div style={{display:"flex",flexDirection:"column",gap:4}}>
                   {adminMatchList.map(match => {
-                    const r = results[match.id] || {home:"",away:""};
+                    const saved = results[match.id] || {home:"",away:""};
+                    // Use local draft state tracked by match id
+                    const draft = results[`draft_${match.id}`] || saved;
+                    const isDirty = draft.home !== saved.home || draft.away !== saved.away;
+                    const isSaved = saved.home !== "" && saved.away !== "";
+
+                    const setDraft = (side, val) => {
+                      setResults(prev => ({
+                        ...prev,
+                        [`draft_${match.id}`]: {
+                          ...(prev[`draft_${match.id}`] || prev[match.id] || {home:"",away:""}),
+                          [side]: val
+                        }
+                      }));
+                    };
+
+                    const saveThis = async () => {
+                      const h = draft.home;
+                      const a = draft.away;
+                      if (h === "" || a === "") { showToast("Enter both scores first","error"); return; }
+                      try {
+                        await db.saveResult(match.id, h, a);
+                        setResults(prev => {
+                          const next = {...prev};
+                          next[match.id] = {home:h, away:a};
+                          delete next[`draft_${match.id}`];
+                          return next;
+                        });
+                        showToast(`${match.home} ${h}–${a} ${match.away} saved`);
+                        // Refresh leaderboard
+                        const lb = await db.loadLeaderboard();
+                        setLeaderboard(lb.map(r => ({name:r.name,points:r.points||0,count:r.predictions_count||0})));
+                      } catch { showToast("Save failed","error"); }
+                    };
+
                     return (
                       <div key={match.id} style={{
-                        background:"rgba(255,255,255,0.025)",
-                        border:"1px solid rgba(255,255,255,0.06)",
+                        background: isSaved ? "rgba(74,222,128,0.04)" : "rgba(255,255,255,0.025)",
+                        border: `1px solid ${isSaved ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.06)"}`,
                         borderRadius:9,padding:"9px 12px",
                         display:"flex",alignItems:"center",gap:8
                       }}>
                         <div style={{minWidth:52,textAlign:"center"}}>
-                          {match.kickoff&&(
-                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
+                          {match.kickoff && (
+                            <div style={{fontSize:8,color:"rgba(255,255,255,0.2)"}}>
                               {fmtDate(match.kickoff)}<br/>
                               {fmtTime(match.kickoff)}
                             </div>
                           )}
-                          {r.home!==""&&r.away!==""&&(
-                            <div style={{fontSize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
+                          {isSaved && !isDirty && (
+                            <div style={{fontSize:8,color:"#4ade80",marginTop:2}}>✓ saved</div>
+                          )}
+                          {isDirty && (
+                            <div style={{fontSize:8,color:"#fbbf24",marginTop:2}}>● edited</div>
                           )}
                         </div>
-                        <span style={{flex:1,fontSize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
+
+                        <span style={{flex:1,fontSize:11,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
+
                         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                           <input type="number" min={0} max={99}
-                            value={r.home}
-                            onChange={async e => {
-                              const newR = {...results,[match.id]:{...(results[match.id]||{}),home:e.target.value}};
-                              setResults(newR);
-                              if (e.target.value !== "" && results[match.id]?.away !== "")
-                                await db.saveResult(match.id, e.target.value, results[match.id]?.away || 0);
-                            }}
+                            value={draft.home}
+                            onChange={e => setDraft("home", e.target.value)}
                             placeholder="-"
                             style={{
                               width:34,height:30,textAlign:"center",
                               background:"rgba(74,222,128,0.07)",
-                              border:"1px solid rgba(74,222,128,0.2)",
+                              border:`1px solid ${isDirty?"rgba(251,191,36,0.4)":"rgba(74,222,128,0.2)"}`,
                               borderRadius:5,color:"#4ade80",
                               fontSize:14,fontWeight:700,fontFamily:"inherit",outline:"none"
                             }}
                           />
                           <span style={{color:"rgba(255,255,255,0.18)",fontSize:10}}>:</span>
                           <input type="number" min={0} max={99}
-                            value={r.away}
-                            onChange={async e => {
-                              const newR = {...results,[match.id]:{...(results[match.id]||{}),away:e.target.value}};
-                              setResults(newR);
-                              if (e.target.value !== "" && results[match.id]?.home !== "")
-                                await db.saveResult(match.id, results[match.id]?.home || 0, e.target.value);
-                            }}
+                            value={draft.away}
+                            onChange={e => setDraft("away", e.target.value)}
                             placeholder="-"
                             style={{
                               width:34,height:30,textAlign:"center",
                               background:"rgba(74,222,128,0.07)",
-                              border:"1px solid rgba(74,222,128,0.2)",
+                              border:`1px solid ${isDirty?"rgba(251,191,36,0.4)":"rgba(74,222,128,0.2)"}`,
                               borderRadius:5,color:"#4ade80",
                               fontSize:14,fontWeight:700,fontFamily:"inherit",outline:"none"
                             }}
                           />
                         </div>
-                        <span style={{flex:1,fontSize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
+
+                        <span style={{flex:1,fontSize:11,color:"#e8f2fb"}}>{tf(match.away)}</span>
+
+                        <button onClick={saveThis} style={{
+                          padding:"4px 10px",flexShrink:0,
+                          background:isDirty
+                            ? "linear-gradient(135deg,#16a34a,#15803d)"
+                            : "rgba(74,222,128,0.08)",
+                          border:`1px solid ${isDirty?"rgba(74,222,128,0.5)":"rgba(74,222,128,0.15)"}`,
+                          borderRadius:6,
+                          color:isDirty?"#fff":"rgba(74,222,128,0.4)",
+                          fontSize:10,fontWeight:700,
+                          cursor:isDirty?"pointer":"default",
+                          fontFamily:"inherit"
+                        }}>
+                          {isSaved && !isDirty ? "✓" : "Save"}
+                        </button>
                       </div>
                     );
                   })}
