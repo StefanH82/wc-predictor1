@@ -695,7 +695,7 @@ Use exact team names as given. Be precise with scores.`;
         overflow:"hidden"
       }}>
         <img
-          src="/Lionel Messi.png"
+          src="/Right.jpg"
           alt="Right panel"
           style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
         />
