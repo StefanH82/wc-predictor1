@@ -695,7 +695,7 @@ Use exact team names as given. Be precise with scores.`;
         overflow:"hidden"
       }}>
         <img
-          src="/Right.png"
+          src="/image-4202271-1.png"
           alt="Right panel"
           style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
