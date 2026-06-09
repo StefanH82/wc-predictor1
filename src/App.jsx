@@ -109,11 +109,11 @@ const GROUP_MATCHES = [
   {id:"E6",group:"E",stage:"Group E",home:"Curaçao",away:"Ivory Coast",kickoff:"2026-06-25T20:00:00Z",venue:"Lincoln Financial Field"},
   // GROUP F
   {id:"F1",group:"F",stage:"Group F",home:"Netherlands",away:"Japan",kickoff:"2026-06-14T20:00:00Z",venue:"AT&T Stadium"},
-  {id:"F2",group:"F",stage:"Group F",home:"Ukraine",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
-  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Ukraine",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
+  {id:"F2",group:"F",stage:"Group F",home:"Sweden",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
+  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Sweden",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
   {id:"F4",group:"F",stage:"Group F",home:"Tunisia",away:"Japan",kickoff:"2026-06-20T04:00:00Z",venue:"Estadio BBVA"},
   {id:"F5",group:"F",stage:"Group F",home:"Tunisia",away:"Netherlands",kickoff:"2026-06-25T23:00:00Z",venue:"AT&T Stadium"},
-  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Ukraine",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
+  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Sweden",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
   // GROUP G
   {id:"G1",group:"G",stage:"Group G",home:"Belgium",away:"Egypt",kickoff:"2026-06-15T19:00:00Z",venue:"Lumen Field"},
   {id:"G2",group:"G",stage:"Group G",home:"Iran",away:"New Zealand",kickoff:"2026-06-16T01:00:00Z",venue:"SoFi Stadium"},
@@ -1819,7 +1819,7 @@ Use exact team names as given. Be precise with scores.`;
             {rank:24,team:"Türkiye",flag:"🇹🇷",pts:1578,change:"—"},
             {rank:25,team:"Australia",flag:"🇦🇺",pts:1563,change:"—"},
             {rank:26,team:"Norway",flag:"🇳🇴",pts:1548,change:"—"},
-            {rank:27,team:"Ukraine",flag:"🇺🇦",pts:1534,change:"—"},
+            {rank:27,team:"Sweden",flag:"🇺🇦",pts:1534,change:"—"},
             {rank:28,team:"Canada",flag:"🇨🇦",pts:1521,change:"▼2"},
             {rank:29,team:"Algeria",flag:"🇩🇿",pts:1509,change:"—"},
             {rank:30,team:"Panama",flag:"🇵🇦",pts:1498,change:"—"},
@@ -1926,7 +1926,7 @@ Use exact team names as given. Be precise with scores.`;
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:3}}>
                     {FIFA_RANKINGS.map((r,i) => {
-                      const isInWC = ["France","Spain","Argentina","England","Portugal","Brazil","Netherlands","Morocco","Belgium","Germany","Croatia","Colombia","Senegal","Mexico","USA","Uruguay","Japan","Switzerland","South Korea","Ecuador","Austria","Türkiye","Australia","Norway","Ukraine","Canada","Algeria","Panama","Egypt","Scotland","Paraguay","Tunisia","Ivory Coast","Bosnia & Herzegovina","Czech Republic","Iraq","Saudi Arabia","Iran","Ghana","Jordan","Cape Verde","New Zealand","Qatar","South Africa","Uzbekistan","Haiti","Curaçao","DR Congo","Czechia"].includes(r.team);
+                      const isInWC = ["France","Spain","Argentina","England","Portugal","Brazil","Netherlands","Morocco","Belgium","Germany","Croatia","Colombia","Senegal","Mexico","USA","Uruguay","Japan","Switzerland","South Korea","Ecuador","Austria","Türkiye","Australia","Norway","Sweden","Canada","Algeria","Panama","Egypt","Scotland","Paraguay","Tunisia","Ivory Coast","Bosnia & Herzegovina","Czech Republic","Iraq","Saudi Arabia","Iran","Ghana","Jordan","Cape Verde","New Zealand","Qatar","South Africa","Uzbekistan","Haiti","Curaçao","DR Congo","Czechia"].includes(r.team);
                       return (
                         <div key={r.rank} style={{
                           display:"grid",
