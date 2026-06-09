@@ -676,7 +676,7 @@ Use exact team names as given. Be precise with scores.`;
         <img
           src="/Left.jpg"
           alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"Contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"Fill",opacity:0.9}}
         />
       </div>
       )}
@@ -697,7 +697,7 @@ Use exact team names as given. Be precise with scores.`;
         <img
           src="/image-4202271-1.png"
           alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"contain",opacity:0.9}}
+          style={{width:"100%",height:"100%",objectFit:"Fill",opacity:0.9}}
         />
       </div>
       )}
