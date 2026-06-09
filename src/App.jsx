@@ -674,7 +674,7 @@ Use exact team names as given. Be precise with scores.`;
         overflow:"hidden"
       }}>
         <img
-          src="https://placehold.co/200x500/1c76bc/ffffff?text=200+x+500"
+          src="/Left.jpg"
           alt="Left panel"
           style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
@@ -695,7 +695,7 @@ Use exact team names as given. Be precise with scores.`;
         overflow:"hidden"
       }}>
         <img
-          src="https://placehold.co/200x500/c60b1e/ffffff?text=200+x+500"
+          src="/Right.png"
           alt="Right panel"
           style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
         />
