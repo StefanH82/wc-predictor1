@@ -8,7 +8,7 @@ const TEAM_FLAGS = {
   "Brazil":"🇧🇷","Morocco":"🇲🇦","Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Haiti":"🇭🇹",
   "USA":"🇺🇸","Paraguay":"🇵🇾","Australia":"🇦🇺","Türkiye":"🇹🇷",
   "Germany":"🇩🇪","Ecuador":"🇪🇨","Ivory Coast":"🇨🇮","Curaçao":"🇨🇼",
-  "Netherlands":"🇳🇱","Japan":"🇯🇵","Tunisia":"🇹🇳","Sweden":"🇸🇪",
+  "Netherlands":"🇳🇱","Japan":"🇯🇵","Tunisia":"🇹🇳","Ukraine":"🇺🇦",
   "Belgium":"🇧🇪","Iran":"🇮🇷","Egypt":"🇪🇬","New Zealand":"🇳🇿",
   "Spain":"🇪🇸","Uruguay":"🇺🇾","Saudi Arabia":"🇸🇦","Cape Verde":"🇨🇻",
   "France":"🇫🇷","Senegal":"🇸🇳","Norway":"🇳🇴","Iraq":"🇮🇶",
@@ -109,11 +109,11 @@ const GROUP_MATCHES = [
   {id:"E6",group:"E",stage:"Group E",home:"Curaçao",away:"Ivory Coast",kickoff:"2026-06-25T20:00:00Z",venue:"Lincoln Financial Field"},
   // GROUP F
   {id:"F1",group:"F",stage:"Group F",home:"Netherlands",away:"Japan",kickoff:"2026-06-14T20:00:00Z",venue:"AT&T Stadium"},
-  {id:"F2",group:"F",stage:"Group F",home:"Sweden",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
-  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Sweden",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
+  {id:"F2",group:"F",stage:"Group F",home:"Ukraine",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
+  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Ukraine",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
   {id:"F4",group:"F",stage:"Group F",home:"Tunisia",away:"Japan",kickoff:"2026-06-20T04:00:00Z",venue:"Estadio BBVA"},
   {id:"F5",group:"F",stage:"Group F",home:"Tunisia",away:"Netherlands",kickoff:"2026-06-25T23:00:00Z",venue:"AT&T Stadium"},
-  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Sweden",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
+  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Ukraine",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
   // GROUP G
   {id:"G1",group:"G",stage:"Group G",home:"Belgium",away:"Egypt",kickoff:"2026-06-15T19:00:00Z",venue:"Lumen Field"},
   {id:"G2",group:"G",stage:"Group G",home:"Iran",away:"New Zealand",kickoff:"2026-06-16T01:00:00Z",venue:"SoFi Stadium"},
@@ -185,9 +185,9 @@ function calcPoints(predictions, results) {
     const ph=parseInt(pred.home), pa=parseInt(pred.away);
     const rh=parseInt(r.home), ra=parseInt(r.away);
     if (isNaN(ph)||isNaN(pa)||isNaN(rh)||isNaN(ra)) continue;
-    if (ph===rh&&pa===ra) { pts+=3; continue; }
+    if (ph===rh&&pa===ra) { pts+=10; continue; }
     const pw=ph>pa?"H":ph<pa?"A":"D", rw=rh>ra?"H":rh<ra?"A":"D";
-    if (pw===rw) pts+=1;
+    if (pw===rw) pts+=5;
   }
   return pts;
 }
@@ -381,17 +381,8 @@ export default function App() {
   // UI
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
+  const [tick, setTick] = useState(0);
 
-  // Screen width tracker for side panels
-  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
-  const [statsSection, setStatsSection] = useState("rankings");
-  const [probabilities, setProbabilities] = useState({}); // { matchId: {home, draw, away, fetched} }
-  const [fetchingProbs, setFetchingProbs] = useState(false);
-  useEffect(() => {
-    const handleResize = () => setIsWideScreen(window.innerWidth > 1200);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
   useEffect(() => {
     const t = setInterval(() => setTick(n => n+1), 30000);
     return () => clearInterval(t);
@@ -540,7 +531,7 @@ For each match, find the final full-time score. Return ONLY a JSON array, no oth
 If a match result is not yet available or the match hasn't finished, omit it from the array.
 Use exact team names as given. Be precise with scores.`;
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const response = await fetch("/api/claude", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -629,21 +620,10 @@ Use exact team names as given. Be precise with scores.`;
       .filter(m => !isPredictionLocked(m.kickoff) || !results[m.id])
       .map(m => `${m.id}: ${m.home} vs ${m.away}`)
       .join("\n");
-
     if (!matchLines.trim()) { setFetchingProbs(false); return; }
-
     try {
-      const prompt = `Today is ${today}.
-
-Search the web for the latest FIFA World Cup 2026 win probability predictions for these upcoming matches:
-${matchLines}
-
-For each match return the win probability percentages. Return ONLY a JSON array, no markdown, no explanation:
-[{"id":"matchId","home_pct":67,"draw_pct":21,"away_pct":12},...]
-
-Percentages must add up to 100. Use your best estimate based on FIFA rankings and recent form if no specific odds found.`;
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
+      const prompt = `Today is ${today}.\nSearch the web for the latest FIFA World Cup 2026 win probability predictions for these upcoming matches:\n${matchLines}\nReturn ONLY a JSON array, no markdown:\n[{"id":"matchId","home_pct":67,"draw_pct":21,"away_pct":12},...]\nPercentages must add up to 100.`;
+      const response = await fetch("/api/claude", {
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
@@ -660,20 +640,35 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
         const parsed = JSON.parse(jsonMatch[0]);
         const newProbs = {...probabilities};
         parsed.forEach(p => {
-          if (p.id && p.home_pct != null) {
-            newProbs[p.id] = {
-              home: Math.round(p.home_pct),
-              draw: Math.round(p.draw_pct),
-              away: Math.round(p.away_pct),
-              fetched: new Date().toLocaleTimeString()
-            };
-          }
+          if (p.id && p.home_pct!=null)
+            newProbs[p.id] = {home:Math.round(p.home_pct),draw:Math.round(p.draw_pct),away:Math.round(p.away_pct),fetched:new Date().toLocaleTimeString()};
         });
         setProbabilities(newProbs);
         showToast(`Win probabilities updated for ${parsed.length} match(es)`);
       }
     } catch(e) { showToast("Failed to fetch probabilities","error"); }
     setFetchingProbs(false);
+  }
+
+  // ─── ADMIN: RESET USER PASSWORD ────────────────────────────────────────────
+  async function resetUserPassword(userName, newPassword) {
+    if (!newPassword || newPassword.length < 6) {
+      showToast("Password must be at least 6 characters","error"); return false;
+    }
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/reset_user_password`, {
+        method:"POST",
+        headers:{
+          "apikey": SUPABASE_ANON,
+          "Authorization": `Bearer ${SUPABASE_ANON}`,
+          "Content-Type":"application/json"
+        },
+        body: JSON.stringify({ p_name: userName, p_new_password: newPassword })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      showToast(`Password reset for ${userName}`);
+      return true;
+    } catch(e) { showToast("Reset failed: "+e.message,"error"); return false; }
   }
 
   // ─── DISPLAY HELPERS ───────────────────────────────────────────────────────
@@ -718,48 +713,6 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
       position:"relative",
       overflowX:"hidden"
     }}>
-      {/* ── LEFT IMAGE HOLDER — hidden on screens narrower than 1200px ── */}
-      {isWideScreen && (
-      <div style={{
-        position:"fixed",
-        left:0,
-        top:"50%",
-        transform:"translateY(-50%)",
-        width:350,
-        height:500,
-        zIndex:5,
-        pointerEvents:"none",
-        overflow:"hidden"
-      }}>
-        <img
-          src="/Left.jpg"
-          alt="Left panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
-        />
-      </div>
-      )}
-
-      {/* ── RIGHT IMAGE HOLDER — hidden on screens narrower than 1200px ── */}
-      {isWideScreen && (
-      <div style={{
-        position:"fixed",
-        right:0,
-        top:"50%",
-        transform:"translateY(-50%)",
-        width:350,
-        height:500,
-        zIndex:5,
-        pointerEvents:"none",
-        overflow:"hidden"
-      }}>
-        <img
-          src="/image-4202271-1.png"
-          alt="Right panel"
-          style={{width:"100%",height:"100%",objectFit:"cover",opacity:0.9}}
-        />
-      </div>
-      )}
-
       {/* Diagonal pitch lines */}
       <div style={{
         position:"fixed",inset:0,zIndex:0,pointerEvents:"none",
@@ -855,7 +808,6 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
-              {id:"stats",label:"Stats"},
               {id:"admin",label:"Admin"}
             ].map(t => (
               <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="leaderboard")loadGlobal();}} style={{
@@ -1022,25 +974,13 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                 </div>
               )}
 
-              {/* View toggle + probability fetch */}
+              {/* View toggle */}
               <div style={{
                 display:"flex",alignItems:"center",justifyContent:"space-between",
-                margin:"14px 0 0",flexWrap:"wrap",gap:8
+                margin:"14px 0 0"
               }}>
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <div style={{fontSize:11,color:"rgba(255,255,255,0.25)"}}>
-                    {viewMode==="group" ? "Showing by group" : "Showing by date"}
-                  </div>
-                  <button onClick={()=>fetchProbabilities(activeMatchList)} disabled={fetchingProbs} style={{
-                    padding:"4px 10px",
-                    background:fetchingProbs?"rgba(28,118,188,0.1)":"rgba(28,118,188,0.15)",
-                    border:"1px solid rgba(28,118,188,0.3)",
-                    borderRadius:20,color:fetchingProbs?"rgba(162,206,236,0.4)":"#a2ceec",
-                    fontSize:10,fontWeight:600,cursor:fetchingProbs?"not-allowed":"pointer",
-                    fontFamily:"inherit"
-                  }}>
-                    {fetchingProbs?"⏳ Fetching…":"📊 Get Win Odds"}
-                  </button>
+                <div style={{fontSize:15,color:"rgba(255,255,255,0.25)"}}>
+                  {viewMode==="group" ? "Showing by group" : "Showing by date"}
                 </div>
                 <div style={{
                   display:"flex",
@@ -1110,19 +1050,18 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                     const ph=parseInt(pred.home),pa=parseInt(pred.away);
                     const rh=parseInt(result.home),ra=parseInt(result.away);
                     if (!isNaN(ph)&&!isNaN(pa)) {
-                      if(ph===rh&&pa===ra) ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
+                      if(ph===rh&&pa===ra) ptsBadge={v:"+3",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
                       else {
                         const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
                         ptsBadge = pw===rw
-                          ? {v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
+                          ? {v:"+1",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
                           : {v:"0",c:"rgba(255,255,255,0.25)",b:"rgba(255,255,255,0.04)"};
                       }
                     }
                   }
 
                   return (
-                    <div key={match.id} style={{borderRadius:9,overflow:"hidden",marginBottom:0}}>
-                    <div style={{
+                    <div key={match.id} style={{
                       background:locked
                         ? hasResult
                           ? "rgba(255,255,255,0.025)"
@@ -1135,8 +1074,7 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                         : locked ? "rgba(251,191,36,0.15)"
                         : hasPred ? "rgba(28,118,188,0.18)"
                         : "rgba(255,255,255,0.06)"}`,
-                      borderRadius: probabilities[match.id] && !hasResult ? "9px 9px 0 0" : 9,
-                      padding:"9px 12px",
+                      borderRadius:9,padding:"9px 12px",
                       display:"flex",alignItems:"center",gap:8,
                       opacity: locked && !hasResult ? 0.6 : 1
                     }}>
@@ -1238,34 +1176,6 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                         }}>Pending</div>
                       )}
                     </div>
-                    {/* Win probability bar */}
-                    {probabilities[match.id] && !hasResult && (() => {
-                      const prob = probabilities[match.id];
-                      return (
-                        <div style={{
-                          padding:"6px 12px 8px",
-                          background:"rgba(0,0,0,0.15)",
-                          borderTop:"1px solid rgba(255,255,255,0.04)",
-                          borderRadius:"0 0 9px 9px",
-                          marginTop:-4
-                        }}>
-                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                            <span style={{fontSize:10,fontWeight:700,color:"#a2ceec"}}>{prob.home}%</span>
-                            <span style={{fontSize:9,color:"rgba(255,255,255,0.3)"}}>Draw {prob.draw}%</span>
-                            <span style={{fontSize:10,fontWeight:700,color:"#a2ceec"}}>{prob.away}%</span>
-                          </div>
-                          <div style={{display:"flex",height:4,borderRadius:2,overflow:"hidden",gap:1}}>
-                            <div style={{width:`${prob.home}%`,background:"#1c76bc",borderRadius:"2px 0 0 2px"}}/>
-                            <div style={{width:`${prob.draw}%`,background:"rgba(255,255,255,0.2)"}}/>
-                            <div style={{width:`${prob.away}%`,background:"#292562",borderRadius:"0 2px 2px 0"}}/>
-                          </div>
-                          <div style={{fontSize:8,color:"rgba(255,255,255,0.18)",marginTop:4,textAlign:"right"}}>
-                            odds · {prob.fetched}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
                   );
                 })}
               </div>
@@ -1705,6 +1615,19 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                             </div>
                           </div>
                           <button onClick={async () => {
+                            const newPass = window.prompt(`Reset password for ${entry.name}:\nEnter new password (min 6 chars):`);
+                            if (!newPass) return;
+                            await resetUserPassword(entry.name, newPass);
+                          }} style={{
+                            padding:"5px 10px",
+                            background:"rgba(28,118,188,0.12)",
+                            border:"1px solid rgba(28,118,188,0.25)",
+                            borderRadius:6,color:"#a2ceec",
+                            fontSize:11,fontWeight:700,
+                            cursor:"pointer",fontFamily:"inherit",
+                            flexShrink:0,marginRight:4
+                          }}>🔑 Reset</button>
+                          <button onClick={async () => {
                             if (!window.confirm(`Remove ${entry.name} from the leaderboard?`)) return;
                             try {
                               await db.removeUser(entry.name);
@@ -1750,109 +1673,64 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
 
                 <div style={{display:"flex",flexDirection:"column",gap:4}}>
                   {adminMatchList.map(match => {
-                    const saved = results[match.id] || {home:"",away:""};
-                    // Use local draft state tracked by match id
-                    const draft = results[`draft_${match.id}`] || saved;
-                    const isDirty = draft.home !== saved.home || draft.away !== saved.away;
-                    const isSaved = saved.home !== "" && saved.away !== "";
-
-                    const setDraft = (side, val) => {
-                      setResults(prev => ({
-                        ...prev,
-                        [`draft_${match.id}`]: {
-                          ...(prev[`draft_${match.id}`] || prev[match.id] || {home:"",away:""}),
-                          [side]: val
-                        }
-                      }));
-                    };
-
-                    const saveThis = async () => {
-                      const h = draft.home;
-                      const a = draft.away;
-                      if (h === "" || a === "") { showToast("Enter both scores first","error"); return; }
-                      try {
-                        await db.saveResult(match.id, h, a);
-                        setResults(prev => {
-                          const next = {...prev};
-                          next[match.id] = {home:h, away:a};
-                          delete next[`draft_${match.id}`];
-                          return next;
-                        });
-                        showToast(`${match.home} ${h}–${a} ${match.away} saved`);
-                        // Refresh leaderboard
-                        const lb = await db.loadLeaderboard();
-                        setLeaderboard(lb.map(r => ({name:r.name,points:r.points||0,count:r.predictions_count||0})));
-                      } catch { showToast("Save failed","error"); }
-                    };
-
+                    const r = results[match.id] || {home:"",away:""};
                     return (
                       <div key={match.id} style={{
-                        background: isSaved ? "rgba(74,222,128,0.04)" : "rgba(255,255,255,0.025)",
-                        border: `1px solid ${isSaved ? "rgba(74,222,128,0.15)" : "rgba(255,255,255,0.06)"}`,
+                        background:"rgba(255,255,255,0.025)",
+                        border:"1px solid rgba(255,255,255,0.06)",
                         borderRadius:9,padding:"9px 12px",
                         display:"flex",alignItems:"center",gap:8
                       }}>
                         <div style={{minWidth:52,textAlign:"center"}}>
-                          {match.kickoff && (
-                            <div style={{fontSize:8,color:"rgba(255,255,255,0.2)"}}>
+                          {match.kickoff&&(
+                            <div style={{fontSize:15,color:"rgba(255,255,255,0.2)"}}>
                               {fmtDate(match.kickoff)}<br/>
                               {fmtTime(match.kickoff)}
                             </div>
                           )}
-                          {isSaved && !isDirty && (
-                            <div style={{fontSize:8,color:"#4ade80",marginTop:2}}>✓ saved</div>
-                          )}
-                          {isDirty && (
-                            <div style={{fontSize:8,color:"#fbbf24",marginTop:2}}>● edited</div>
+                          {r.home!==""&&r.away!==""&&(
+                            <div style={{fontSize:15,color:"#4ade80",marginTop:2}}>✓ saved</div>
                           )}
                         </div>
-
-                        <span style={{flex:1,fontSize:11,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
-
+                        <span style={{flex:1,fontSize:15,textAlign:"right",color:"#e8f2fb"}}>{tf(match.home)}</span>
                         <div style={{display:"flex",alignItems:"center",gap:4,flexShrink:0}}>
                           <input type="number" min={0} max={99}
-                            value={draft.home}
-                            onChange={e => setDraft("home", e.target.value)}
+                            value={r.home}
+                            onChange={async e => {
+                              const newR = {...results,[match.id]:{...(results[match.id]||{}),home:e.target.value}};
+                              setResults(newR);
+                              if (e.target.value !== "" && results[match.id]?.away !== "")
+                                await db.saveResult(match.id, e.target.value, results[match.id]?.away || 0);
+                            }}
                             placeholder="-"
                             style={{
                               width:34,height:30,textAlign:"center",
                               background:"rgba(74,222,128,0.07)",
-                              border:`1px solid ${isDirty?"rgba(251,191,36,0.4)":"rgba(74,222,128,0.2)"}`,
+                              border:"1px solid rgba(74,222,128,0.2)",
                               borderRadius:5,color:"#4ade80",
                               fontSize:14,fontWeight:700,fontFamily:"inherit",outline:"none"
                             }}
                           />
                           <span style={{color:"rgba(255,255,255,0.18)",fontSize:10}}>:</span>
                           <input type="number" min={0} max={99}
-                            value={draft.away}
-                            onChange={e => setDraft("away", e.target.value)}
+                            value={r.away}
+                            onChange={async e => {
+                              const newR = {...results,[match.id]:{...(results[match.id]||{}),away:e.target.value}};
+                              setResults(newR);
+                              if (e.target.value !== "" && results[match.id]?.home !== "")
+                                await db.saveResult(match.id, results[match.id]?.home || 0, e.target.value);
+                            }}
                             placeholder="-"
                             style={{
                               width:34,height:30,textAlign:"center",
                               background:"rgba(74,222,128,0.07)",
-                              border:`1px solid ${isDirty?"rgba(251,191,36,0.4)":"rgba(74,222,128,0.2)"}`,
+                              border:"1px solid rgba(74,222,128,0.2)",
                               borderRadius:5,color:"#4ade80",
                               fontSize:14,fontWeight:700,fontFamily:"inherit",outline:"none"
                             }}
                           />
                         </div>
-
-                        <span style={{flex:1,fontSize:11,color:"#e8f2fb"}}>{tf(match.away)}</span>
-
-                        <button onClick={saveThis} style={{
-                          padding:"4px 10px",flexShrink:0,
-                          background:isDirty
-                            ? "linear-gradient(135deg,#16a34a,#15803d)"
-                            : "rgba(74,222,128,0.08)",
-                          border:`1px solid ${isDirty?"rgba(74,222,128,0.5)":"rgba(74,222,128,0.15)"}`,
-                          borderRadius:6,
-                          color:isDirty?"#fff":"rgba(74,222,128,0.4)",
-                          fontSize:10,fontWeight:700,
-                          cursor:isDirty?"pointer":"default",
-                          fontFamily:"inherit"
-                        }}>
-                          {isSaved && !isDirty ? "✓" : "Save"}
-                        </button>
+                        <span style={{flex:1,fontSize:15,color:"#e8f2fb"}}>{tf(match.away)}</span>
                       </div>
                     );
                   })}
@@ -1890,285 +1768,6 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
             )}
           </div>
         )}
-        {/* ═══ STATS TAB ═══ */}
-        {tab==="stats" && (()=>{
-          const FIFA_RANKINGS = [
-            {rank:1,team:"France",flag:"🇫🇷",pts:1877,change:"▲2"},
-            {rank:2,team:"Spain",flag:"🇪🇸",pts:1876,change:"▲1"},
-            {rank:3,team:"Argentina",flag:"🇦🇷",pts:1875,change:"▼1"},
-            {rank:4,team:"England",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",pts:1826,change:"—"},
-            {rank:5,team:"Portugal",flag:"🇵🇹",pts:1764,change:"▲1"},
-            {rank:6,team:"Brazil",flag:"🇧🇷",pts:1761,change:"▼1"},
-            {rank:7,team:"Netherlands",flag:"🇳🇱",pts:1758,change:"—"},
-            {rank:8,team:"Morocco",flag:"🇲🇦",pts:1756,change:"—"},
-            {rank:9,team:"Belgium",flag:"🇧🇪",pts:1735,change:"—"},
-            {rank:10,team:"Germany",flag:"🇩🇪",pts:1730,change:"—"},
-            {rank:11,team:"Croatia",flag:"🇭🇷",pts:1717,change:"—"},
-            {rank:12,team:"Italy",flag:"🇮🇹",pts:1700,change:"▲1"},
-            {rank:13,team:"Colombia",flag:"🇨🇴",pts:1693,change:"▲1"},
-            {rank:14,team:"Senegal",flag:"🇸🇳",pts:1689,change:"▲2"},
-            {rank:15,team:"Mexico",flag:"🇲🇽",pts:1681,change:"▲1"},
-            {rank:16,team:"USA",flag:"🇺🇸",pts:1673,change:"▼2"},
-            {rank:17,team:"Uruguay",flag:"🇺🇾",pts:1673,change:"—"},
-            {rank:18,team:"Japan",flag:"🇯🇵",pts:1660,change:"▲1"},
-            {rank:19,team:"Switzerland",flag:"🇨🇭",pts:1649,change:"▲1"},
-            {rank:20,team:"Denmark",flag:"🇩🇰",pts:1621,change:"—"},
-            {rank:21,team:"South Korea",flag:"🇰🇷",pts:1608,change:"—"},
-            {rank:22,team:"Ecuador",flag:"🇪🇨",pts:1598,change:"—"},
-            {rank:23,team:"Austria",flag:"🇦🇹",pts:1591,change:"—"},
-            {rank:24,team:"Türkiye",flag:"🇹🇷",pts:1578,change:"—"},
-            {rank:25,team:"Australia",flag:"🇦🇺",pts:1563,change:"—"},
-            {rank:26,team:"Norway",flag:"🇳🇴",pts:1548,change:"—"},
-            {rank:27,team:"Ukraine",flag:"🇺🇦",pts:1534,change:"—"},
-            {rank:28,team:"Canada",flag:"🇨🇦",pts:1521,change:"▼2"},
-            {rank:29,team:"Algeria",flag:"🇩🇿",pts:1509,change:"—"},
-            {rank:30,team:"Panama",flag:"🇵🇦",pts:1498,change:"—"},
-            {rank:31,team:"Egypt",flag:"🇪🇬",pts:1487,change:"—"},
-            {rank:32,team:"Scotland",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",pts:1476,change:"—"},
-            {rank:33,team:"Paraguay",flag:"🇵🇾",pts:1462,change:"—"},
-            {rank:34,team:"Tunisia",flag:"🇹🇳",pts:1451,change:"—"},
-            {rank:35,team:"Ivory Coast",flag:"🇨🇮",pts:1439,change:"—"},
-            {rank:36,team:"Bosnia & Herzegovina",flag:"🇧🇦",pts:1428,change:"—"},
-            {rank:37,team:"Czech Republic",flag:"🇨🇿",pts:1415,change:"—"},
-            {rank:38,team:"Iraq",flag:"🇮🇶",pts:1389,change:"—"},
-            {rank:39,team:"Saudi Arabia",flag:"🇸🇦",pts:1371,change:"—"},
-            {rank:40,team:"Iran",flag:"🇮🇷",pts:1358,change:"—"},
-            {rank:41,team:"Ghana",flag:"🇬🇭",pts:1342,change:"—"},
-            {rank:42,team:"Jordan",flag:"🇯🇴",pts:1321,change:"—"},
-            {rank:43,team:"Cape Verde",flag:"🇨🇻",pts:1298,change:"—"},
-            {rank:44,team:"New Zealand",flag:"🇳🇿",pts:1201,change:"—"},
-            {rank:45,team:"Qatar",flag:"🇶🇦",pts:1187,change:"—"},
-            {rank:46,team:"South Africa",flag:"🇿🇦",pts:1154,change:"—"},
-            {rank:47,team:"Uzbekistan",flag:"🇺🇿",pts:1098,change:"—"},
-            {rank:48,team:"Haiti",flag:"🇭🇹",pts:1021,change:"—"},
-            {rank:49,team:"Curaçao",flag:"🇨🇼",pts:987,change:"—"},
-            {rank:50,team:"DR Congo",flag:"🇨🇩",pts:1312,change:"—"},
-          ];
-
-          const WC_HISTORY = [
-            {year:2022,host:"Qatar",winner:"Argentina 🇦🇷",runner:"France 🇫🇷",score:"3–3 (4–2 pens)",top:"Mbappé 8⚽"},
-            {year:2018,host:"Russia",winner:"France 🇫🇷",runner:"Croatia 🇭🇷",score:"4–2",top:"Kane 6⚽"},
-            {year:2014,host:"Brazil",winner:"Germany 🇩🇪",runner:"Argentina 🇦🇷",score:"1–0 (AET)",top:"Müller 5⚽"},
-            {year:2010,host:"South Africa",winner:"Spain 🇪🇸",runner:"Netherlands 🇳🇱",score:"1–0 (AET)",top:"Müller 5⚽"},
-            {year:2006,host:"Germany",winner:"Italy 🇮🇹",runner:"France 🇫🇷",score:"1–1 (5–3 pens)",top:"Klose 5⚽"},
-            {year:2002,host:"Korea/Japan",winner:"Brazil 🇧🇷",runner:"Germany 🇩🇪",score:"2–0",top:"Ronaldo 8⚽"},
-            {year:1998,host:"France",winner:"France 🇫🇷",runner:"Brazil 🇧🇷",score:"3–0",top:"Suker 6⚽"},
-            {year:1994,host:"USA",winner:"Brazil 🇧🇷",runner:"Italy 🇮🇹",score:"0–0 (3–2 pens)",top:"Stoichkov/Salenko 6⚽"},
-            {year:1990,host:"Italy",winner:"Germany 🇩🇪",runner:"Argentina 🇦🇷",score:"1–0",top:"Schillaci 6⚽"},
-            {year:1986,host:"Mexico",winner:"Argentina 🇦🇷",runner:"Germany 🇩🇪",score:"3–2",top:"Lineker 6⚽"},
-            {year:1982,host:"Spain",winner:"Italy 🇮🇹",runner:"Germany 🇩🇪",score:"3–1",top:"Rummenigge 5⚽"},
-            {year:1978,host:"Argentina",winner:"Argentina 🇦🇷",runner:"Netherlands 🇳🇱",score:"3–1 (AET)",top:"Kempes 6⚽"},
-            {year:1974,host:"Germany",winner:"Germany 🇩🇪",runner:"Netherlands 🇳🇱",score:"2–1",top:"Lato 7⚽"},
-            {year:1970,host:"Mexico",winner:"Brazil 🇧🇷",runner:"Italy 🇮🇹",score:"4–1",top:"Müller 10⚽"},
-            {year:1966,host:"England",winner:"England 🏴󠁧󠁢󠁥󠁮󠁧󠁿",runner:"Germany 🇩🇪",score:"4–2 (AET)",top:"Eusébio 9⚽"},
-            {year:1962,host:"Chile",winner:"Brazil 🇧🇷",runner:"Czechoslovakia",score:"3–1",top:"Jerkovic/Albert/etc 5⚽"},
-            {year:1958,host:"Sweden",winner:"Brazil 🇧🇷",runner:"Sweden",score:"5–2",top:"Fontaine 13⚽"},
-            {year:1954,host:"Switzerland",winner:"Germany 🇩🇪",runner:"Hungary",score:"3–2",top:"Morlock/Kocsis 11⚽"},
-            {year:1950,host:"Brazil",winner:"Uruguay 🇺🇾",runner:"Brazil 🇧🇷",score:"2–1",top:"Ademir 8⚽"},
-            {year:1938,host:"France",winner:"Italy 🇮🇹",runner:"Hungary",score:"4–2",top:"Leônidas 8⚽"},
-            {year:1934,host:"Italy",winner:"Italy 🇮🇹",runner:"Czechoslovakia",score:"2–1 (AET)",top:"Schiavio/Nejedly/Conen 4⚽"},
-            {year:1930,host:"Uruguay",winner:"Uruguay 🇺🇾",runner:"Argentina 🇦🇷",score:"4–2",top:"Stábile 8⚽"},
-          ];
-
-          const WC_RECORDS = [
-            {label:"Most titles",value:"Brazil",detail:"5 times (1958,1962,1970,1994,2002)",flag:"🇧🇷"},
-            {label:"Most finals",value:"Germany / Argentina",detail:"8 finals each",flag:"🇩🇪🇦🇷"},
-            {label:"All-time top scorer",value:"Miroslav Klose",detail:"16 goals (4 WCs)",flag:"🇩🇪"},
-            {label:"Most goals in one WC",value:"Just Fontaine",detail:"13 goals — France 1958",flag:"🇫🇷"},
-            {label:"Biggest win",value:"Hungary 10–1 El Salvador",detail:"1982 Group Stage",flag:"🇭🇺"},
-            {label:"Most appearances",value:"Lionel Messi",detail:"26 matches",flag:"🇦🇷"},
-            {label:"Youngest scorer",value:"Pelé — 17 yrs 239 days",detail:"Sweden 1958",flag:"🇧🇷"},
-            {label:"Most goals in one match",value:"Oleg Salenko",detail:"5 goals vs Cameroon, 1994",flag:"🇷🇺"},
-            {label:"Fastest goal",value:"Hakan Şükür — 11 seconds",detail:"Turkey vs South Korea, 2002",flag:"🇹🇷"},
-            {label:"Most WC wins as host",value:"Uruguay, Italy, England, France, Argentina, Germany",detail:"Won on home soil",flag:"🏆"},
-          ];
-
-          return (
-            <div style={{paddingTop:20}}>
-              {/* Section toggle */}
-              <div style={{
-                display:"flex",gap:3,marginBottom:20,
-                background:"rgba(255,255,255,0.04)",
-                borderRadius:10,padding:4
-              }}>
-                {[
-                  {id:"rankings",label:"🌍 FIFA Rankings"},
-                  {id:"history",label:"🏆 WC Winners"},
-                  {id:"records",label:"📊 Records"}
-                ].map(s => (
-                  <button key={s.id} onClick={()=>setStatsSection(s.id)} style={{
-                    flex:1,padding:"8px 4px",border:"none",borderRadius:7,
-                    background:statsSection===s.id?"rgba(28,118,188,0.4)":"transparent",
-                    color:statsSection===s.id?"#a2ceec":"rgba(255,255,255,0.3)",
-                    fontWeight:statsSection===s.id?700:400,
-                    fontSize:11,cursor:"pointer",fontFamily:"inherit",
-                    transition:"all 0.15s"
-                  }}>{s.label}</button>
-                ))}
-              </div>
-
-              {/* FIFA RANKINGS */}
-              {statsSection==="rankings" && (
-                <div>
-                  <div style={{
-                    fontSize:10,color:"rgba(255,255,255,0.3)",
-                    marginBottom:10,textAlign:"right"
-                  }}>Source: FIFA · April 2026</div>
-                  <div style={{
-                    display:"grid",
-                    gridTemplateColumns:"40px 1fr 80px 50px",
-                    gap:"4px 8px",
-                    fontSize:10,color:"rgba(255,255,255,0.3)",
-                    padding:"0 10px",marginBottom:6,
-                    letterSpacing:1,textTransform:"uppercase"
-                  }}>
-                    <span>Rank</span><span>Team</span><span style={{textAlign:"right"}}>Points</span><span style={{textAlign:"center"}}>Move</span>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",gap:3}}>
-                    {FIFA_RANKINGS.map((r,i) => {
-                      const isInWC = ["France","Spain","Argentina","England","Portugal","Brazil","Netherlands","Morocco","Belgium","Germany","Croatia","Colombia","Senegal","Mexico","USA","Uruguay","Japan","Switzerland","South Korea","Ecuador","Austria","Türkiye","Australia","Norway","Ukraine","Canada","Algeria","Panama","Egypt","Scotland","Paraguay","Tunisia","Ivory Coast","Bosnia & Herzegovina","Czech Republic","Iraq","Saudi Arabia","Iran","Ghana","Jordan","Cape Verde","New Zealand","Qatar","South Africa","Uzbekistan","Haiti","Curaçao","DR Congo","Czechia"].includes(r.team);
-                      return (
-                        <div key={r.rank} style={{
-                          display:"grid",
-                          gridTemplateColumns:"40px 1fr 80px 50px",
-                          gap:"0 8px",alignItems:"center",
-                          background:i<3?"rgba(28,118,188,0.1)":"rgba(255,255,255,0.025)",
-                          border:i<3?"1px solid rgba(28,118,188,0.25)":"1px solid rgba(255,255,255,0.05)",
-                          borderRadius:7,padding:"8px 10px"
-                        }}>
-                          <span style={{
-                            fontSize:i<3?14:12,fontWeight:700,
-                            color:i===0?"#f5d060":i===1?"#b3b3b3":i===2?"#cd7f32":"rgba(255,255,255,0.35)"
-                          }}>{r.rank}</span>
-                          <span style={{fontSize:12,color:"#e8f2fb"}}>
-                            {r.flag} {r.team}
-                            {isInWC && <span style={{
-                              marginLeft:6,fontSize:8,
-                              background:"rgba(28,118,188,0.2)",
-                              border:"1px solid rgba(28,118,188,0.3)",
-                              borderRadius:3,padding:"1px 4px",
-                              color:"#a2ceec"
-                            }}>WC26</span>}
-                          </span>
-                          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",textAlign:"right"}}>{r.pts}</span>
-                          <span style={{
-                            fontSize:10,textAlign:"center",fontWeight:600,
-                            color:r.change.includes("▲")?"#4ade80":r.change.includes("▼")?"#f87171":"rgba(255,255,255,0.25)"
-                          }}>{r.change}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* WC HISTORY */}
-              {statsSection==="history" && (
-                <div>
-                  <div style={{
-                    fontSize:10,color:"rgba(255,255,255,0.3)",
-                    marginBottom:10,textAlign:"right"
-                  }}>All 22 FIFA World Cup finals</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                    {WC_HISTORY.map(wc => (
-                      <div key={wc.year} style={{
-                        background:wc.year===2022?"rgba(28,118,188,0.1)":"rgba(255,255,255,0.025)",
-                        border:wc.year===2022?"1px solid rgba(28,118,188,0.25)":"1px solid rgba(255,255,255,0.06)",
-                        borderRadius:8,padding:"10px 14px",
-                        display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"
-                      }}>
-                        <div style={{
-                          minWidth:44,textAlign:"center",
-                          fontSize:14,fontWeight:700,
-                          color:wc.year===2022?"#a2ceec":"rgba(255,255,255,0.4)"
-                        }}>{wc.year}</div>
-                        <div style={{flex:1,minWidth:120}}>
-                          <div style={{fontSize:12,fontWeight:700,color:"#e8f2fb"}}>{wc.winner}</div>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:2}}>
-                            def. {wc.runner} · {wc.score}
-                          </div>
-                        </div>
-                        <div style={{textAlign:"right"}}>
-                          <div style={{fontSize:9,color:"rgba(255,255,255,0.25)"}}>Top scorer</div>
-                          <div style={{fontSize:10,color:"#a2ceec"}}>{wc.top}</div>
-                        </div>
-                        <div style={{
-                          fontSize:9,color:"rgba(255,255,255,0.25)",
-                          minWidth:60,textAlign:"right"
-                        }}>📍 {wc.host}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* RECORDS */}
-              {statsSection==="records" && (
-                <div>
-                  <div style={{
-                    fontSize:10,color:"rgba(255,255,255,0.3)",
-                    marginBottom:10,textAlign:"right"
-                  }}>World Cup all-time records</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:6}}>
-                    {WC_RECORDS.map((rec,i) => (
-                      <div key={i} style={{
-                        background:"rgba(255,255,255,0.025)",
-                        border:"1px solid rgba(255,255,255,0.06)",
-                        borderRadius:9,padding:"12px 16px",
-                        display:"flex",alignItems:"center",gap:14
-                      }}>
-                        <div style={{
-                          fontSize:24,minWidth:36,textAlign:"center"
-                        }}>{rec.flag}</div>
-                        <div style={{flex:1}}>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>
-                            {rec.label}
-                          </div>
-                          <div style={{fontSize:13,fontWeight:700,color:"#e8f2fb"}}>{rec.value}</div>
-                          <div style={{fontSize:10,color:"rgba(28,118,188,0.8)",marginTop:2}}>{rec.detail}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Title count summary */}
-                  <div style={{marginTop:20}}>
-                    <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginBottom:10,letterSpacing:1,textTransform:"uppercase"}}>World Cup titles by country</div>
-                    {[
-                      {team:"Brazil",flag:"🇧🇷",titles:5,years:"1958 · 1962 · 1970 · 1994 · 2002"},
-                      {team:"Germany",flag:"🇩🇪",titles:4,years:"1954 · 1974 · 1990 · 2014"},
-                      {team:"Italy",flag:"🇮🇹",titles:4,years:"1934 · 1938 · 1982 · 2006"},
-                      {team:"Argentina",flag:"🇦🇷",titles:3,years:"1978 · 1986 · 2022"},
-                      {team:"France",flag:"🇫🇷",titles:2,years:"1998 · 2018"},
-                      {team:"Uruguay",flag:"🇺🇾",titles:2,years:"1930 · 1950"},
-                      {team:"England",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",titles:1,years:"1966"},
-                      {team:"Spain",flag:"🇪🇸",titles:1,years:"2010"},
-                    ].map(t => (
-                      <div key={t.team} style={{
-                        display:"flex",alignItems:"center",gap:10,
-                        marginBottom:6
-                      }}>
-                        <span style={{fontSize:13,minWidth:24}}>{t.flag}</span>
-                        <span style={{fontSize:12,color:"#e8f2fb",minWidth:80}}>{t.team}</span>
-                        <div style={{flex:1,height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,overflow:"hidden"}}>
-                          <div style={{
-                            width:`${(t.titles/5)*100}%`,
-                            height:"100%",
-                            background:"linear-gradient(90deg,#1c76bc,#a2ceec)",
-                            borderRadius:3
-                          }}/>
-                        </div>
-                        <span style={{fontSize:12,fontWeight:700,color:"#a2ceec",minWidth:16}}>{t.titles}</span>
-                        <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",minWidth:120,textAlign:"right"}}>{t.years}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })()}
-
       </main>
 
       {/* Toast */}
@@ -2190,10 +1789,6 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
         input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
         input[type=number]{-moz-appearance:textfield}
         *{box-sizing:border-box}
-        .side-panel { display: block; }
-        @media (max-width: 1200px) {
-          .side-panel { display: none; }
-        }
       `}</style>
     </div>
   );
