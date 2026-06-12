@@ -1110,11 +1110,11 @@ Percentages must add up to 100. Use your best estimate based on FIFA rankings an
                     const ph=parseInt(pred.home),pa=parseInt(pred.away);
                     const rh=parseInt(result.home),ra=parseInt(result.away);
                     if (!isNaN(ph)&&!isNaN(pa)) {
-                      if(ph===rh&&pa===ra) ptsBadge={v:"+3",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
+                      if(ph===rh&&pa===ra) ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};
                       else {
                         const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
                         ptsBadge = pw===rw
-                          ? {v:"+1",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
+                          ? {v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}
                           : {v:"0",c:"rgba(255,255,255,0.25)",b:"rgba(255,255,255,0.04)"};
                       }
                     }
