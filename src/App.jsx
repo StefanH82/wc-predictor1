@@ -777,7 +777,7 @@ Use exact team names as given. Be precise with scores.`;
             <div style={{display:"flex",alignItems:"center",gap:10}}>
               {totalResults>0 && (
                 <div style={{
-                  fontSize:10,color:"rgba(255,255,255,0.3)",
+                  fontSize:12,color:"rgba(255,255,255,0.3)",
                   background:"rgba(255,255,255,0.04)",
                   border:"1px solid rgba(255,255,255,0.08)",
                   borderRadius:20,padding:"4px 10px"
@@ -804,7 +804,7 @@ Use exact team names as given. Be precise with scores.`;
                   background:"rgba(255,255,255,0.05)",
                   border:"1px solid rgba(255,255,255,0.08)",
                   borderRadius:20,padding:"5px 10px",
-                  color:"rgba(255,255,255,0.3)",fontSize:10,
+                  color:"rgba(255,255,255,0.3)",fontSize:12,
                   cursor:"pointer",fontFamily:"inherit",marginLeft:4
                 }}>Log out</button>
                 </>
@@ -962,7 +962,7 @@ Use exact team names as given. Be precise with scores.`;
               <div style={{
                 marginTop:20,padding:"8px 12px",
                 background:"rgba(28,118,188,0.06)",border:"1px solid rgba(28,118,188,0.12)",
-                borderRadius:7,fontSize:10,color:"rgba(255,255,255,0.25)",textAlign:"center"
+                borderRadius:7,fontSize:12,color:"rgba(255,255,255,0.25)",textAlign:"center"
               }}>
                 ⏱ Predictions lock 1 hour before each kick-off · All times SAST (UTC+2)
               </div>
@@ -1140,7 +1140,7 @@ Use exact team names as given. Be precise with scores.`;
                             pointerEvents:locked?"none":"auto"
                           }}
                         />
-                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:10,fontWeight:300}}>:</span>
+                        <span style={{color:"rgba(255,255,255,0.2)",fontSize:12,fontWeight:300}}>:</span>
                         <input type="number" min={0} max={99}
                           value={pred.away}
                           onChange={e => { if (!locked) setPred(match.id,"away",e.target.value); }}
@@ -1206,7 +1206,7 @@ Use exact team names as given. Be precise with scores.`;
                   {totalPreds} / 104 filled
                 </span>
               </div>
-              <p style={{textAlign:"center",marginTop:8,fontSize:10,color:"rgba(255,255,255,0.17)"}}>
+              <p style={{textAlign:"center",marginTop:8,fontSize:12,color:"rgba(255,255,255,0.17)"}}>
                 +10 exact score · +5 correct result · Locks 1hr before kick-off · All times SAST
               </p>
 
@@ -1230,7 +1230,7 @@ Use exact team names as given. Be precise with scores.`;
                           flex:1,height:1,
                           background:"rgba(255,255,255,0.06)"
                         }}/>
-                        <div style={{fontSize:10,color:"rgba(255,255,255,0.2)"}}>
+                        <div style={{fontSize:12,color:"rgba(255,255,255,0.2)"}}>
                           {matches.length} match{matches.length!==1?"es":""}
                         </div>
                       </div>
@@ -1321,7 +1321,7 @@ Use exact team names as given. Be precise with scores.`;
                                     pointerEvents:locked?"none":"auto"
                                   }}
                                 />
-                                <span style={{color:"rgba(255,255,255,0.2)",fontSize:10}}>:</span>
+                                <span style={{color:"rgba(255,255,255,0.2)",fontSize:12}}>:</span>
                                 <input type="number" min={0} max={99}
                                   value={pred.away}
                                   onChange={e => { if (!locked) setPred(match.id,"away",e.target.value); }}
@@ -1380,7 +1380,7 @@ Use exact team names as given. Be precise with scores.`;
               <button onClick={loadGlobal} style={{
                 background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",
                 borderRadius:8,padding:"5px 12px",color:"rgba(255,255,255,0.35)",
-                fontSize:10,cursor:"pointer",fontFamily:"inherit"
+                fontSize:12,cursor:"pointer",fontFamily:"inherit"
               }}>↻ Refresh</button>
             </div>
 
@@ -1394,7 +1394,7 @@ Use exact team names as given. Be precise with scores.`;
                 {pts:"+5",label:"Correct result",c:"#60a5fa"},
                 {pts:"1040",label:"Max pts",c:"rgba(255,255,255,0.5)"}
               ].map(({pts,label,c})=>(
-                <span key={label} style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
+                <span key={label} style={{fontSize:12,color:"rgba(255,255,255,0.25)"}}>
                   <span style={{color:c,fontWeight:700}}>{pts}</span> {label}
                 </span>
               ))}
@@ -1439,7 +1439,7 @@ Use exact team names as given. Be precise with scores.`;
                           width:30,height:30,borderRadius:"50%",flexShrink:0,
                           background:isMe?"linear-gradient(135deg,#1c76bc,#1c76bc)":"rgba(255,255,255,0.07)",
                           display:"flex",alignItems:"center",justifyContent:"center",
-                          fontSize:10,fontWeight:800,color:isMe?"#000":"rgba(255,255,255,0.35)"
+                          fontSize:12,fontWeight:800,color:isMe?"#000":"rgba(255,255,255,0.35)"
                         }}>{getInitials(entry.name)}</div>
                         <div style={{flex:1}}>
                           <div style={{fontSize:13,color:isMe?"#a2ceec":"#e8f2fb",fontWeight:isMe?700:400}}>
@@ -1519,7 +1519,7 @@ Use exact team names as given. Be precise with scores.`;
                     </p>
                   </div>
                   <span style={{
-                    fontSize:10,color:"#4ade80",
+                    fontSize:12,color:"#4ade80",
                     background:"rgba(74,222,128,0.08)",
                     border:"1px solid rgba(74,222,128,0.2)",
                     borderRadius:20,padding:"3px 10px"
@@ -1542,7 +1542,7 @@ Use exact team names as given. Be precise with scores.`;
                         parses scores automatically and updates the leaderboard.
                       </div>
                       {lastFetched && (
-                        <div style={{fontSize:10,color:"rgba(255,255,255,0.2)",marginTop:6}}>
+                        <div style={{fontSize:12,color:"rgba(255,255,255,0.2)",marginTop:6}}>
                           Last run: {lastFetched.toLocaleTimeString()}
                         </div>
                       )}
@@ -1616,11 +1616,11 @@ Use exact team names as given. Be precise with scores.`;
                             width:28,height:28,borderRadius:"50%",flexShrink:0,
                             background:"rgba(255,255,255,0.08)",
                             display:"flex",alignItems:"center",justifyContent:"center",
-                            fontSize:10,fontWeight:700,color:"rgba(255,255,255,0.4)"
+                            fontSize:12,fontWeight:700,color:"rgba(255,255,255,0.4)"
                           }}>{getInitials(entry.name)}</div>
                           <div style={{flex:1}}>
                             <div style={{fontSize:12,color:"#e8f2fb"}}>{entry.name}</div>
-                            <div style={{fontSize:10,color:"rgba(255,255,255,0.25)"}}>
+                            <div style={{fontSize:12,color:"rgba(255,255,255,0.25)"}}>
                               {entry.points} pts · {entry.count||0} predictions
                             </div>
                           </div>
@@ -1676,7 +1676,7 @@ Use exact team names as given. Be precise with scores.`;
                       background:adminGroup===g?"rgba(74,222,128,0.12)":"transparent",
                       border:adminGroup===g?"1px solid rgba(74,222,128,0.3)":"1px solid transparent",
                       color:adminGroup===g?"#4ade80":"rgba(255,255,255,0.25)",
-                      fontSize:10,fontWeight:600,cursor:"pointer",fontFamily:"inherit"
+                      fontSize:12,fontWeight:600,cursor:"pointer",fontFamily:"inherit"
                     }}>{g==="KO"?"KO":g}</button>
                   ))}
                 </div>
@@ -1721,7 +1721,7 @@ Use exact team names as given. Be precise with scores.`;
                               fontSize:14,fontWeight:700,fontFamily:"inherit",outline:"none"
                             }}
                           />
-                          <span style={{color:"rgba(255,255,255,0.18)",fontSize:10}}>:</span>
+                          <span style={{color:"rgba(255,255,255,0.18)",fontSize:12}}>:</span>
                           <input type="number" min={0} max={99}
                             value={r.away}
                             onChange={async e => {
@@ -1882,8 +1882,8 @@ Use exact team names as given. Be precise with scores.`;
 
               {statsSection==="rankings" && (
                 <div>
-                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>Source: FIFA · 2026</div>
-                  <div style={{display:"grid",gridTemplateColumns:"40px 1fr 80px 50px",gap:"4px 8px",fontSize:10,color:"rgba(255,255,255,0.3)",padding:"0 10px",marginBottom:6,letterSpacing:1,textTransform:"uppercase"}}>
+                  <div style={{fontSize:12,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>Source: FIFA · 2026</div>
+                  <div style={{display:"grid",gridTemplateColumns:"40px 1fr 80px 50px",gap:"4px 8px",fontSize:12,color:"rgba(255,255,255,0.3)",padding:"0 10px",marginBottom:6,letterSpacing:1,textTransform:"uppercase"}}>
                     <span>Rank</span><span>Team</span><span style={{textAlign:"right"}}>Points</span><span style={{textAlign:"center"}}>Move</span>
                   </div>
                   <div style={{display:"flex",flexDirection:"column",gap:3}}>
@@ -1903,7 +1903,7 @@ Use exact team names as given. Be precise with scores.`;
                             {isInWC&&<span style={{marginLeft:6,fontSize:8,background:"rgba(28,118,188,0.2)",border:"1px solid rgba(28,118,188,0.3)",borderRadius:3,padding:"1px 4px",color:"#a2ceec"}}>WC26</span>}
                           </span>
                           <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",textAlign:"right"}}>{r.pts}</span>
-                          <span style={{fontSize:10,textAlign:"center",fontWeight:600,color:r.change.includes("▲")?"#4ade80":r.change.includes("▼")?"#f87171":"rgba(255,255,255,0.25)"}}>{r.change}</span>
+                          <span style={{fontSize:12,textAlign:"center",fontWeight:600,color:r.change.includes("▲")?"#4ade80":r.change.includes("▼")?"#f87171":"rgba(255,255,255,0.25)"}}>{r.change}</span>
                         </div>
                       );
                     })}
@@ -1913,7 +1913,7 @@ Use exact team names as given. Be precise with scores.`;
 
               {statsSection==="history" && (
                 <div>
-                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>All 22 FIFA World Cup finals</div>
+                  <div style={{fontSize:12,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>All 22 FIFA World Cup finals</div>
                   <div style={{display:"flex",flexDirection:"column",gap:4}}>
                     {WC_HISTORY.map(wc=>(
                       <div key={wc.year} style={{
@@ -1924,11 +1924,11 @@ Use exact team names as given. Be precise with scores.`;
                         <div style={{minWidth:44,textAlign:"center",fontSize:14,fontWeight:700,color:wc.year===2022?"#a2ceec":"rgba(255,255,255,0.4)"}}>{wc.year}</div>
                         <div style={{flex:1,minWidth:120}}>
                           <div style={{fontSize:12,fontWeight:700,color:"#e8f2fb"}}>{wc.winner}</div>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:2}}>def. {wc.runner} · {wc.score}</div>
+                          <div style={{fontSize:12,color:"rgba(255,255,255,0.3)",marginTop:2}}>def. {wc.runner} · {wc.score}</div>
                         </div>
                         <div style={{textAlign:"right"}}>
                           <div style={{fontSize:12,color:"rgba(255,255,255,0.25)"}}>Top scorer</div>
-                          <div style={{fontSize:10,color:"#a2ceec"}}>{wc.top}</div>
+                          <div style={{fontSize:12,color:"#a2ceec"}}>{wc.top}</div>
                         </div>
                         <div style={{fontSize:12,color:"rgba(255,255,255,0.25)",minWidth:60,textAlign:"right"}}>📍 {wc.host}</div>
                       </div>
@@ -1944,9 +1944,9 @@ Use exact team names as given. Be precise with scores.`;
                       <div key={i} style={{background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"12px 16px",display:"flex",alignItems:"center",gap:14}}>
                         <div style={{fontSize:24,minWidth:36,textAlign:"center"}}>{rec.flag}</div>
                         <div style={{flex:1}}>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>{rec.label}</div>
+                          <div style={{fontSize:12,color:"rgba(255,255,255,0.3)",letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>{rec.label}</div>
                           <div style={{fontSize:13,fontWeight:700,color:"#e8f2fb"}}>{rec.value}</div>
-                          <div style={{fontSize:10,color:"rgba(28,118,188,0.8)",marginTop:2}}>{rec.detail}</div>
+                          <div style={{fontSize:12,color:"rgba(28,118,188,0.8)",marginTop:2}}>{rec.detail}</div>
                         </div>
                       </div>
                     ))}
