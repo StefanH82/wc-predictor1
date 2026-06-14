@@ -382,7 +382,7 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [tick, setTick] = useState(0);
-  const [statsSection, setStatsSection] = useState("rankings");
+  const [, set] = useState("rankings");
   const [probabilities, setProbabilities] = useState({});
   const [fetchingProbs, setFetchingProbs] = useState(false);
   const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
@@ -817,6 +817,7 @@ Use exact team names as given. Be precise with scores.`;
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
+              {id:"stats",label:"Stats"},
               {id:"admin",label:"Admin"}
             ].map(t => (
               <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="leaderboard")loadGlobal();}} style={{
@@ -1869,17 +1870,17 @@ Use exact team names as given. Be precise with scores.`;
             <div style={{paddingTop:20}}>
               <div style={{display:"flex",gap:3,marginBottom:20,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:4}}>
                 {[{id:"rankings",label:"🌍 FIFA Rankings"},{id:"history",label:"🏆 WC Winners"},{id:"records",label:"📊 Records"}].map(s=>(
-                  <button key={s.id} onClick={()=>setStatsSection(s.id)} style={{
+                  <button key={s.id} onClick={()=>set(s.id)} style={{
                     flex:1,padding:"8px 4px",border:"none",borderRadius:7,
-                    background:statsSection===s.id?"rgba(28,118,188,0.4)":"transparent",
-                    color:statsSection===s.id?"#a2ceec":"rgba(255,255,255,0.3)",
-                    fontWeight:statsSection===s.id?700:400,
+                    background:===s.id?"rgba(28,118,188,0.4)":"transparent",
+                    color:===s.id?"#a2ceec":"rgba(255,255,255,0.3)",
+                    fontWeight:===s.id?700:400,
                     fontSize:11,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"
                   }}>{s.label}</button>
                 ))}
               </div>
 
-              {statsSection==="rankings" && (
+              {==="rankings" && (
                 <div>
                   <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>Source: FIFA · 2026</div>
                   <div style={{display:"grid",gridTemplateColumns:"40px 1fr 80px 50px",gap:"4px 8px",fontSize:10,color:"rgba(255,255,255,0.3)",padding:"0 10px",marginBottom:6,letterSpacing:1,textTransform:"uppercase"}}>
@@ -1910,7 +1911,7 @@ Use exact team names as given. Be precise with scores.`;
                 </div>
               )}
 
-              {statsSection==="history" && (
+              {==="history" && (
                 <div>
                   <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>All 22 FIFA World Cup finals</div>
                   <div style={{display:"flex",flexDirection:"column",gap:4}}>
