@@ -384,10 +384,19 @@ export default function App() {
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState(null);
   const [tick, setTick] = useState(0);
+  const [statsSection, setStatsSection] = useState("rankings");
+  const [probabilities, setProbabilities] = useState({});
+  const [fetchingProbs, setFetchingProbs] = useState(false);
+  const [isWideScreen, setIsWideScreen] = useState(window.innerWidth > 1200);
 
   useEffect(() => {
     const t = setInterval(() => setTick(n => n+1), 30000);
     return () => clearInterval(t);
+  }, []);
+  useEffect(() => {
+    const handleResize = () => setIsWideScreen(window.innerWidth > 1200);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   function showToast(msg, type="success") {
