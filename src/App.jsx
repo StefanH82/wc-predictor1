@@ -1927,10 +1927,10 @@ Use exact team names as given. Be precise with scores.`;
                           <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:2}}>def. {wc.runner} · {wc.score}</div>
                         </div>
                         <div style={{textAlign:"right"}}>
-                          <div style={{fontSize:9,color:"rgba(255,255,255,0.25)"}}>Top scorer</div>
+                          <div style={{fontSize:12,color:"rgba(255,255,255,0.25)"}}>Top scorer</div>
                           <div style={{fontSize:10,color:"#a2ceec"}}>{wc.top}</div>
                         </div>
-                        <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",minWidth:60,textAlign:"right"}}>📍 {wc.host}</div>
+                        <div style={{fontSize:12,color:"rgba(255,255,255,0.25)",minWidth:60,textAlign:"right"}}>📍 {wc.host}</div>
                       </div>
                     ))}
                   </div>
@@ -1969,7 +1969,7 @@ Use exact team names as given. Be precise with scores.`;
                         <div style={{width:`${(t.titles/5)*100}%`,height:"100%",background:"linear-gradient(90deg,#1c76bc,#a2ceec)",borderRadius:3}}/>
                       </div>
                       <span style={{fontSize:12,fontWeight:700,color:"#a2ceec",minWidth:16}}>{t.titles}</span>
-                      <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",minWidth:100,textAlign:"right"}}>{t.years}</span>
+                      <span style={{fontSize:12,color:"rgba(255,255,255,0.25)",minWidth:100,textAlign:"right"}}>{t.years}</span>
                     </div>
                   ))}
                 </div>
