@@ -1777,6 +1777,205 @@ Use exact team names as given. Be precise with scores.`;
             )}
           </div>
         )}
+        {/* ═══ STATS TAB ═══ */}
+        {tab==="stats" && (()=>{
+          const FIFA_RANKINGS = [
+            {rank:1,team:"France",flag:"🇫🇷",pts:1877,change:"▲2"},
+            {rank:2,team:"Spain",flag:"🇪🇸",pts:1876,change:"▲1"},
+            {rank:3,team:"Argentina",flag:"🇦🇷",pts:1875,change:"▼1"},
+            {rank:4,team:"England",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",pts:1826,change:"—"},
+            {rank:5,team:"Portugal",flag:"🇵🇹",pts:1764,change:"▲1"},
+            {rank:6,team:"Brazil",flag:"🇧🇷",pts:1761,change:"▼1"},
+            {rank:7,team:"Netherlands",flag:"🇳🇱",pts:1758,change:"—"},
+            {rank:8,team:"Morocco",flag:"🇲🇦",pts:1756,change:"—"},
+            {rank:9,team:"Belgium",flag:"🇧🇪",pts:1735,change:"—"},
+            {rank:10,team:"Germany",flag:"🇩🇪",pts:1730,change:"—"},
+            {rank:11,team:"Croatia",flag:"🇭🇷",pts:1717,change:"—"},
+            {rank:12,team:"Italy",flag:"🇮🇹",pts:1700,change:"▲1"},
+            {rank:13,team:"Colombia",flag:"🇨🇴",pts:1693,change:"▲1"},
+            {rank:14,team:"Senegal",flag:"🇸🇳",pts:1689,change:"▲2"},
+            {rank:15,team:"Mexico",flag:"🇲🇽",pts:1681,change:"▲1"},
+            {rank:16,team:"USA",flag:"🇺🇸",pts:1673,change:"▼2"},
+            {rank:17,team:"Uruguay",flag:"🇺🇾",pts:1673,change:"—"},
+            {rank:18,team:"Japan",flag:"🇯🇵",pts:1660,change:"▲1"},
+            {rank:19,team:"Switzerland",flag:"🇨🇭",pts:1649,change:"▲1"},
+            {rank:20,team:"Denmark",flag:"🇩🇰",pts:1621,change:"—"},
+            {rank:21,team:"South Korea",flag:"🇰🇷",pts:1608,change:"—"},
+            {rank:22,team:"Ecuador",flag:"🇪🇨",pts:1598,change:"—"},
+            {rank:23,team:"Austria",flag:"🇦🇹",pts:1591,change:"—"},
+            {rank:24,team:"Türkiye",flag:"🇹🇷",pts:1578,change:"—"},
+            {rank:25,team:"Australia",flag:"🇦🇺",pts:1563,change:"—"},
+            {rank:26,team:"Norway",flag:"🇳🇴",pts:1548,change:"—"},
+            {rank:27,team:"Ukraine",flag:"🇺🇦",pts:1534,change:"—"},
+            {rank:28,team:"Canada",flag:"🇨🇦",pts:1521,change:"▼2"},
+            {rank:29,team:"Algeria",flag:"🇩🇿",pts:1509,change:"—"},
+            {rank:30,team:"Panama",flag:"🇵🇦",pts:1498,change:"—"},
+            {rank:31,team:"Egypt",flag:"🇪🇬",pts:1487,change:"—"},
+            {rank:32,team:"Scotland",flag:"🏴󠁧󠁢󠁳󠁣󠁴󠁿",pts:1476,change:"—"},
+            {rank:33,team:"Paraguay",flag:"🇵🇾",pts:1462,change:"—"},
+            {rank:34,team:"Tunisia",flag:"🇹🇳",pts:1451,change:"—"},
+            {rank:35,team:"Ivory Coast",flag:"🇨🇮",pts:1439,change:"—"},
+            {rank:36,team:"Bosnia & Herzegovina",flag:"🇧🇦",pts:1428,change:"—"},
+            {rank:37,team:"Czechia",flag:"🇨🇿",pts:1415,change:"—"},
+            {rank:38,team:"Iraq",flag:"🇮🇶",pts:1389,change:"—"},
+            {rank:39,team:"Saudi Arabia",flag:"🇸🇦",pts:1371,change:"—"},
+            {rank:40,team:"Iran",flag:"🇮🇷",pts:1358,change:"—"},
+            {rank:41,team:"Ghana",flag:"🇬🇭",pts:1342,change:"—"},
+            {rank:42,team:"Jordan",flag:"🇯🇴",pts:1321,change:"—"},
+            {rank:43,team:"Cape Verde",flag:"🇨🇻",pts:1298,change:"—"},
+            {rank:44,team:"New Zealand",flag:"🇳🇿",pts:1201,change:"—"},
+            {rank:45,team:"Qatar",flag:"🇶🇦",pts:1187,change:"—"},
+            {rank:46,team:"South Africa",flag:"🇿🇦",pts:1154,change:"—"},
+            {rank:47,team:"Uzbekistan",flag:"🇺🇿",pts:1098,change:"—"},
+            {rank:48,team:"Haiti",flag:"🇭🇹",pts:1021,change:"—"},
+            {rank:49,team:"Curaçao",flag:"🇨🇼",pts:987,change:"—"},
+            {rank:50,team:"DR Congo",flag:"🇨🇩",pts:1312,change:"—"},
+          ];
+          const WC_HISTORY = [
+            {year:2022,host:"Qatar",winner:"Argentina 🇦🇷",runner:"France 🇫🇷",score:"3–3 (4–2 pens)",top:"Mbappé 8⚽"},
+            {year:2018,host:"Russia",winner:"France 🇫🇷",runner:"Croatia 🇭🇷",score:"4–2",top:"Kane 6⚽"},
+            {year:2014,host:"Brazil",winner:"Germany 🇩🇪",runner:"Argentina 🇦🇷",score:"1–0 (AET)",top:"Müller 5⚽"},
+            {year:2010,host:"South Africa",winner:"Spain 🇪🇸",runner:"Netherlands 🇳🇱",score:"1–0 (AET)",top:"Müller 5⚽"},
+            {year:2006,host:"Germany",winner:"Italy 🇮🇹",runner:"France 🇫🇷",score:"1–1 (5–3 pens)",top:"Klose 5⚽"},
+            {year:2002,host:"Korea/Japan",winner:"Brazil 🇧🇷",runner:"Germany 🇩🇪",score:"2–0",top:"Ronaldo 8⚽"},
+            {year:1998,host:"France",winner:"France 🇫🇷",runner:"Brazil 🇧🇷",score:"3–0",top:"Suker 6⚽"},
+            {year:1994,host:"USA",winner:"Brazil 🇧🇷",runner:"Italy 🇮🇹",score:"0–0 (3–2 pens)",top:"Stoichkov/Salenko 6⚽"},
+            {year:1990,host:"Italy",winner:"Germany 🇩🇪",runner:"Argentina 🇦🇷",score:"1–0",top:"Schillaci 6⚽"},
+            {year:1986,host:"Mexico",winner:"Argentina 🇦🇷",runner:"Germany 🇩🇪",score:"3–2",top:"Lineker 6⚽"},
+            {year:1982,host:"Spain",winner:"Italy 🇮🇹",runner:"Germany 🇩🇪",score:"3–1",top:"Rummenigge 5⚽"},
+            {year:1978,host:"Argentina",winner:"Argentina 🇦🇷",runner:"Netherlands 🇳🇱",score:"3–1 (AET)",top:"Kempes 6⚽"},
+            {year:1974,host:"Germany",winner:"Germany 🇩🇪",runner:"Netherlands 🇳🇱",score:"2–1",top:"Lato 7⚽"},
+            {year:1970,host:"Mexico",winner:"Brazil 🇧🇷",runner:"Italy 🇮🇹",score:"4–1",top:"Müller 10⚽"},
+            {year:1966,host:"England",winner:"England 🏴󠁧󠁢󠁥󠁮󠁧󠁿",runner:"Germany 🇩🇪",score:"4–2 (AET)",top:"Eusébio 9⚽"},
+            {year:1962,host:"Chile",winner:"Brazil 🇧🇷",runner:"Czechoslovakia",score:"3–1",top:"Jerkovic 5⚽"},
+            {year:1958,host:"Sweden",winner:"Brazil 🇧🇷",runner:"Sweden",score:"5–2",top:"Fontaine 13⚽"},
+            {year:1954,host:"Switzerland",winner:"Germany 🇩🇪",runner:"Hungary",score:"3–2",top:"Kocsis 11⚽"},
+            {year:1950,host:"Brazil",winner:"Uruguay 🇺🇾",runner:"Brazil 🇧🇷",score:"2–1",top:"Ademir 8⚽"},
+            {year:1938,host:"France",winner:"Italy 🇮🇹",runner:"Hungary",score:"4–2",top:"Leônidas 8⚽"},
+            {year:1934,host:"Italy",winner:"Italy 🇮🇹",runner:"Czechoslovakia",score:"2–1 (AET)",top:"Schiavio 4⚽"},
+            {year:1930,host:"Uruguay",winner:"Uruguay 🇺🇾",runner:"Argentina 🇦🇷",score:"4–2",top:"Stábile 8⚽"},
+          ];
+          const WC_RECORDS = [
+            {label:"Most titles",value:"Brazil",detail:"5 times (1958,1962,1970,1994,2002)",flag:"🇧🇷"},
+            {label:"Most finals",value:"Germany / Argentina",detail:"8 finals each",flag:"🇩🇪"},
+            {label:"All-time top scorer",value:"Miroslav Klose",detail:"16 goals (4 WCs)",flag:"🇩🇪"},
+            {label:"Most goals in one WC",value:"Just Fontaine",detail:"13 goals — France 1958",flag:"🇫🇷"},
+            {label:"Biggest win",value:"Hungary 10–1 El Salvador",detail:"1982 Group Stage",flag:"🇭🇺"},
+            {label:"Most appearances",value:"Lionel Messi",detail:"26 matches",flag:"🇦🇷"},
+            {label:"Youngest scorer",value:"Pelé — 17 yrs 239 days",detail:"Sweden 1958",flag:"🇧🇷"},
+            {label:"Fastest goal",value:"Hakan Şükür — 11 seconds",detail:"Turkey vs South Korea, 2002",flag:"🇹🇷"},
+          ];
+          return (
+            <div style={{paddingTop:20}}>
+              <div style={{display:"flex",gap:3,marginBottom:20,background:"rgba(255,255,255,0.04)",borderRadius:10,padding:4}}>
+                {[{id:"rankings",label:"🌍 FIFA Rankings"},{id:"history",label:"🏆 WC Winners"},{id:"records",label:"📊 Records"}].map(s=>(
+                  <button key={s.id} onClick={()=>setStatsSection(s.id)} style={{
+                    flex:1,padding:"8px 4px",border:"none",borderRadius:7,
+                    background:statsSection===s.id?"rgba(28,118,188,0.4)":"transparent",
+                    color:statsSection===s.id?"#a2ceec":"rgba(255,255,255,0.3)",
+                    fontWeight:statsSection===s.id?700:400,
+                    fontSize:11,cursor:"pointer",fontFamily:"inherit",transition:"all 0.15s"
+                  }}>{s.label}</button>
+                ))}
+              </div>
+
+              {statsSection==="rankings" && (
+                <div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>Source: FIFA · 2026</div>
+                  <div style={{display:"grid",gridTemplateColumns:"40px 1fr 80px 50px",gap:"4px 8px",fontSize:10,color:"rgba(255,255,255,0.3)",padding:"0 10px",marginBottom:6,letterSpacing:1,textTransform:"uppercase"}}>
+                    <span>Rank</span><span>Team</span><span style={{textAlign:"right"}}>Points</span><span style={{textAlign:"center"}}>Move</span>
+                  </div>
+                  <div style={{display:"flex",flexDirection:"column",gap:3}}>
+                    {FIFA_RANKINGS.map((r,i)=>{
+                      const wc26Teams = Object.keys(TEAM_FLAGS);
+                      const isInWC = wc26Teams.includes(r.team);
+                      return (
+                        <div key={r.rank} style={{
+                          display:"grid",gridTemplateColumns:"40px 1fr 80px 50px",gap:"0 8px",alignItems:"center",
+                          background:i<3?"rgba(28,118,188,0.1)":"rgba(255,255,255,0.025)",
+                          border:i<3?"1px solid rgba(28,118,188,0.25)":"1px solid rgba(255,255,255,0.05)",
+                          borderRadius:7,padding:"8px 10px"
+                        }}>
+                          <span style={{fontSize:i<3?14:12,fontWeight:700,color:i===0?"#f5d060":i===1?"#b3b3b3":i===2?"#cd7f32":"rgba(255,255,255,0.35)"}}>{r.rank}</span>
+                          <span style={{fontSize:12,color:"#e8f2fb"}}>
+                            {r.flag} {r.team}
+                            {isInWC&&<span style={{marginLeft:6,fontSize:8,background:"rgba(28,118,188,0.2)",border:"1px solid rgba(28,118,188,0.3)",borderRadius:3,padding:"1px 4px",color:"#a2ceec"}}>WC26</span>}
+                          </span>
+                          <span style={{fontSize:12,color:"rgba(255,255,255,0.5)",textAlign:"right"}}>{r.pts}</span>
+                          <span style={{fontSize:10,textAlign:"center",fontWeight:600,color:r.change.includes("▲")?"#4ade80":r.change.includes("▼")?"#f87171":"rgba(255,255,255,0.25)"}}>{r.change}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {statsSection==="history" && (
+                <div>
+                  <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginBottom:10,textAlign:"right"}}>All 22 FIFA World Cup finals</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                    {WC_HISTORY.map(wc=>(
+                      <div key={wc.year} style={{
+                        background:wc.year===2022?"rgba(28,118,188,0.1)":"rgba(255,255,255,0.025)",
+                        border:wc.year===2022?"1px solid rgba(28,118,188,0.25)":"1px solid rgba(255,255,255,0.06)",
+                        borderRadius:8,padding:"10px 14px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"
+                      }}>
+                        <div style={{minWidth:44,textAlign:"center",fontSize:14,fontWeight:700,color:wc.year===2022?"#a2ceec":"rgba(255,255,255,0.4)"}}>{wc.year}</div>
+                        <div style={{flex:1,minWidth:120}}>
+                          <div style={{fontSize:12,fontWeight:700,color:"#e8f2fb"}}>{wc.winner}</div>
+                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",marginTop:2}}>def. {wc.runner} · {wc.score}</div>
+                        </div>
+                        <div style={{textAlign:"right"}}>
+                          <div style={{fontSize:9,color:"rgba(255,255,255,0.25)"}}>Top scorer</div>
+                          <div style={{fontSize:10,color:"#a2ceec"}}>{wc.top}</div>
+                        </div>
+                        <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",minWidth:60,textAlign:"right"}}>📍 {wc.host}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {statsSection==="records" && (
+                <div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:20}}>
+                    {WC_RECORDS.map((rec,i)=>(
+                      <div key={i} style={{background:"rgba(255,255,255,0.025)",border:"1px solid rgba(255,255,255,0.06)",borderRadius:9,padding:"12px 16px",display:"flex",alignItems:"center",gap:14}}>
+                        <div style={{fontSize:24,minWidth:36,textAlign:"center"}}>{rec.flag}</div>
+                        <div style={{flex:1}}>
+                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)",letterSpacing:0.5,textTransform:"uppercase",marginBottom:3}}>{rec.label}</div>
+                          <div style={{fontSize:13,fontWeight:700,color:"#e8f2fb"}}>{rec.value}</div>
+                          <div style={{fontSize:10,color:"rgba(28,118,188,0.8)",marginTop:2}}>{rec.detail}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{fontSize:11,color:"rgba(255,255,255,0.3)",marginBottom:10,letterSpacing:1,textTransform:"uppercase"}}>World Cup titles by country</div>
+                  {[
+                    {team:"Brazil",flag:"🇧🇷",titles:5,years:"1958·1962·1970·1994·2002"},
+                    {team:"Germany",flag:"🇩🇪",titles:4,years:"1954·1974·1990·2014"},
+                    {team:"Italy",flag:"🇮🇹",titles:4,years:"1934·1938·1982·2006"},
+                    {team:"Argentina",flag:"🇦🇷",titles:3,years:"1978·1986·2022"},
+                    {team:"France",flag:"🇫🇷",titles:2,years:"1998·2018"},
+                    {team:"Uruguay",flag:"🇺🇾",titles:2,years:"1930·1950"},
+                    {team:"England",flag:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",titles:1,years:"1966"},
+                    {team:"Spain",flag:"🇪🇸",titles:1,years:"2010"},
+                  ].map(t=>(
+                    <div key={t.team} style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+                      <span style={{fontSize:13,minWidth:24}}>{t.flag}</span>
+                      <span style={{fontSize:12,color:"#e8f2fb",minWidth:80}}>{t.team}</span>
+                      <div style={{flex:1,height:6,background:"rgba(255,255,255,0.06)",borderRadius:3,overflow:"hidden"}}>
+                        <div style={{width:`${(t.titles/5)*100}%`,height:"100%",background:"linear-gradient(90deg,#1c76bc,#a2ceec)",borderRadius:3}}/>
+                      </div>
+                      <span style={{fontSize:12,fontWeight:700,color:"#a2ceec",minWidth:16}}>{t.titles}</span>
+                      <span style={{fontSize:9,color:"rgba(255,255,255,0.25)",minWidth:100,textAlign:"right"}}>{t.years}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </main>
 
       {/* Toast */}
