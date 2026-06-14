@@ -816,6 +816,7 @@ Use exact team names as given. Be precise with scores.`;
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
+              {id:"stats",label:"Stats"},
               {id:"admin",label:"Admin"}
             ].map(t => (
               <button key={t.id} onClick={()=>{setTab(t.id);if(t.id==="leaderboard")loadGlobal();}} style={{
