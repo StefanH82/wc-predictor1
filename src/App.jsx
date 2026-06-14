@@ -8,7 +8,7 @@ const TEAM_FLAGS = {
   "Brazil":"🇧🇷","Morocco":"🇲🇦","Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Haiti":"🇭🇹",
   "USA":"🇺🇸","Paraguay":"🇵🇾","Australia":"🇦🇺","Türkiye":"🇹🇷",
   "Germany":"🇩🇪","Ecuador":"🇪🇨","Ivory Coast":"🇨🇮","Curaçao":"🇨🇼",
-  "Netherlands":"🇳🇱","Japan":"🇯🇵","Tunisia":"🇹🇳","Ukraine":"🇺🇦",
+  "Netherlands":"🇳🇱","Japan":"🇯🇵","Tunisia":"🇹🇳","Sweden":"🇺🇦",
   "Belgium":"🇧🇪","Iran":"🇮🇷","Egypt":"🇪🇬","New Zealand":"🇳🇿",
   "Spain":"🇪🇸","Uruguay":"🇺🇾","Saudi Arabia":"🇸🇦","Cape Verde":"🇨🇻",
   "France":"🇫🇷","Senegal":"🇸🇳","Norway":"🇳🇴","Iraq":"🇮🇶",
@@ -109,11 +109,11 @@ const GROUP_MATCHES = [
   {id:"E6",group:"E",stage:"Group E",home:"Curaçao",away:"Ivory Coast",kickoff:"2026-06-25T20:00:00Z",venue:"Lincoln Financial Field"},
   // GROUP F
   {id:"F1",group:"F",stage:"Group F",home:"Netherlands",away:"Japan",kickoff:"2026-06-14T20:00:00Z",venue:"AT&T Stadium"},
-  {id:"F2",group:"F",stage:"Group F",home:"Ukraine",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
-  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Ukraine",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
+  {id:"F2",group:"F",stage:"Group F",home:"Sweden",away:"Tunisia",kickoff:"2026-06-15T02:00:00Z",venue:"Estadio BBVA"},
+  {id:"F3",group:"F",stage:"Group F",home:"Netherlands",away:"Sweden",kickoff:"2026-06-20T17:00:00Z",venue:"NRG Stadium"},
   {id:"F4",group:"F",stage:"Group F",home:"Tunisia",away:"Japan",kickoff:"2026-06-20T04:00:00Z",venue:"Estadio BBVA"},
   {id:"F5",group:"F",stage:"Group F",home:"Tunisia",away:"Netherlands",kickoff:"2026-06-25T23:00:00Z",venue:"AT&T Stadium"},
-  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Ukraine",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
+  {id:"F6",group:"F",stage:"Group F",home:"Japan",away:"Sweden",kickoff:"2026-06-25T23:00:00Z",venue:"Arrowhead Stadium"},
   // GROUP G
   {id:"G1",group:"G",stage:"Group G",home:"Belgium",away:"Egypt",kickoff:"2026-06-15T19:00:00Z",venue:"Lumen Field"},
   {id:"G2",group:"G",stage:"Group G",home:"Iran",away:"New Zealand",kickoff:"2026-06-16T01:00:00Z",venue:"SoFi Stadium"},
