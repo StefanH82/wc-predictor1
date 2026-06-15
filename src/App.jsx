@@ -821,7 +821,7 @@ Use exact team names as given. Be precise with scores.`;
           </div>
 
           {/* Nav tabs */}
-          <div style={{display:"flex",gap:0}}>
+          <div style={{display:"flex",gap:0,justifyContent:"center"}}>
             {[
               {id:"predict",label:"Predict"},
               {id:"leaderboard",label:"Leaderboard"},
