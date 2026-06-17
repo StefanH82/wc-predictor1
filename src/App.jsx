@@ -343,6 +343,21 @@ const db = {
   }
 };
 
+// Load ALL users' predictions (for leaderboard detail view)
+  async loadAllUserPredictions() {
+    const rows = await db.query("predictions?select=user_id,match_id,home_score,away_score") || [];
+    const map = {};
+    rows.forEach(r => {
+      if (!map[r.user_id]) map[r.user_id] = {};
+      map[r.user_id][r.match_id] = { home: String(r.home_score), away: String(r.away_score) };
+    });
+    return map;
+  },
+
+  async loadAllUsers() {
+    return await db.query("users?select=id,name") || [];
+  };
+
 
 const ADMIN_PIN = "wc2026SH";
 
@@ -369,6 +384,12 @@ export default function App() {
   // Leaderboard
   const [leaderboard, setLeaderboard] = useState([]);
   const [loadingLB, setLoadingLB] = useState(false);
+  const [lbView, setLbView] = useState("rankings");
+  const [allUserPreds, setAllUserPreds] = useState({});
+  const [allUsers, setAllUsers] = useState([]);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailUser, setDetailUser] = useState(null);
+  
 
   // Admin
   const [adminUnlocked, setAdminUnlocked] = useState(false);
@@ -1385,11 +1406,28 @@ Use exact team names as given. Be precise with scores.`;
           <div style={{paddingTop:20}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <h2 style={{margin:0,fontSize:16,color:"#fff",letterSpacing:0.2}}>Company Rankings</h2>
-              <button onClick={loadGlobal} style={{
+              <div style={{display:"flex",gap:6}}>
+                <button onClick={async () => {
+                  if (lbView==="rankings") {
+                    setLbView("detail"); setLoadingDetail(true);
+                    try {
+                      const [preds, users] = await Promise.all([db.loadAllUserPredictions(), db.loadAllUsers()]);
+                      setAllUserPreds(preds); setAllUsers(users);
+                      if (!detailUser && users.length>0) setDetailUser(users[0].id);
+                    } catch(e) { showToast("Failed to load detail","error"); }
+                    setLoadingDetail(false);
+                  } else { setLbView("rankings"); }
+                }} style={{
+                  background:"rgba(28,118,188,0.15)",border:"1px solid rgba(28,118,188,0.3)",
+                  borderRadius:8,padding:"5px 12px",color:"#a2ceec",
+                  fontSize:10,cursor:"pointer",fontFamily:"inherit",fontWeight:600
+                }}>{lbView==="rankings"?"📋 Score Detail":"🏆 Rankings"}</button>
+                <button onClick={loadGlobal} style={{
                 background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.08)",
                 borderRadius:8,padding:"5px 12px",color:"rgba(255,255,255,0.35)",
                 fontSize:10,cursor:"pointer",fontFamily:"inherit"
-              }}>↻ Refresh</button>
+          }}>↻ Refresh</button>
+              </div>
             </div>
 
             {/* Legend */}
@@ -1470,6 +1508,97 @@ Use exact team names as given. Be precise with scores.`;
                     </div>
                   );
                 })}
+              </div>
+            )}
+         {/* ── DETAIL VIEW ── */}
+            {lbView==="detail" && (
+              <div>
+                {loadingDetail ? (
+                  <div style={{textAlign:"center",padding:40,color:"rgba(255,255,255,0.2)",fontSize:12}}>Loading predictions…</div>
+                ) : (
+                  <>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:3,marginBottom:14,background:"rgba(255,255,255,0.025)",borderRadius:10,padding:4}}>
+                      {leaderboard.map(entry => {
+                        const user = allUsers.find(u=>u.name.toLowerCase()===entry.name.toLowerCase());
+                        const uid = user?.id;
+                        return (
+                          <button key={entry.name} onClick={()=>setDetailUser(uid)} style={{
+                            padding:"5px 10px",borderRadius:7,border:"none",
+                            background:detailUser===uid?"rgba(28,118,188,0.3)":"transparent",
+                            color:detailUser===uid?"#a2ceec":"rgba(255,255,255,0.3)",
+                            fontSize:10,fontWeight:detailUser===uid?700:400,
+                            cursor:"pointer",fontFamily:"inherit"
+                          }}>
+                            {entry.name}<span style={{marginLeft:4,fontSize:9,color:detailUser===uid?"#a2ceec":"rgba(255,255,255,0.2)"}}>{entry.points}pts</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {detailUser && (() => {
+                      const userPreds = allUserPreds[detailUser] || {};
+                      const finishedMatches = ALL_MATCHES.filter(m => results[m.id]);
+                      if (!finishedMatches.length) return <div style={{textAlign:"center",padding:40,color:"rgba(255,255,255,0.2)",fontSize:12}}>No match results yet</div>;
+                      const selectedUser = leaderboard.find(e => allUsers.find(u=>u.name.toLowerCase()===e.name.toLowerCase())?.id===detailUser);
+                      let totalPts = 0;
+                      return (
+                        <div>
+                          <div style={{display:"flex",justifyContent:"space-between",marginBottom:10,padding:"8px 12px",background:"rgba(28,118,188,0.08)",border:"1px solid rgba(28,118,188,0.2)",borderRadius:9}}>
+                            <span style={{fontSize:13,fontWeight:700,color:"#a2ceec"}}>{selectedUser?.name}</span>
+                            <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>{finishedMatches.length} completed</span>
+                          </div>
+                          <div style={{display:"flex",flexDirection:"column",gap:4}}>
+                            {finishedMatches.map(match => {
+                              const result = results[match.id];
+                              const pred = userPreds[match.id];
+                              const hasPred = pred && pred.home!=="" && pred.away!=="";
+                              let pts=0, ptsBadge=null;
+                              if (hasPred) {
+                                const ph=parseInt(pred.home),pa=parseInt(pred.away),rh=parseInt(result.home),ra=parseInt(result.away);
+                                if(!isNaN(ph)&&!isNaN(pa)){
+                                  if(ph===rh&&pa===ra){pts=10;ptsBadge={v:"+10",c:"#4ade80",b:"rgba(74,222,128,0.12)"};}
+                                  else{const pw=ph>pa?"H":ph<pa?"A":"D",rw=rh>ra?"H":rh<ra?"A":"D";
+                                    if(pw===rw){pts=5;ptsBadge={v:"+5",c:"#60a5fa",b:"rgba(96,165,250,0.12)"}}
+                                    else ptsBadge={v:"0",c:"rgba(255,100,100,0.7)",b:"rgba(255,100,100,0.08)"};
+                                  }
+                                }
+                              }
+                              totalPts+=pts;
+                              return (
+                                <div key={match.id} style={{
+                                  background:ptsBadge?.v==="+10"?"rgba(74,222,128,0.05)":ptsBadge?.v==="+5"?"rgba(96,165,250,0.05)":hasPred?"rgba(255,100,100,0.04)":"rgba(255,255,255,0.02)",
+                                  border:`1px solid ${ptsBadge?.v==="+10"?"rgba(74,222,128,0.2)":ptsBadge?.v==="+5"?"rgba(96,165,250,0.2)":hasPred?"rgba(255,100,100,0.15)":"rgba(255,255,255,0.05)"}`,
+                                  borderRadius:8,padding:"8px 12px",display:"flex",alignItems:"center",gap:8
+                                }}>
+                                  <div style={{minWidth:36,textAlign:"center",fontSize:11,fontWeight:800,color:ptsBadge?.c||"rgba(255,255,255,0.2)",background:ptsBadge?.b||"transparent",borderRadius:5,padding:"2px 4px"}}>
+                                    {ptsBadge?ptsBadge.v:<span style={{fontSize:9}}>—</span>}
+                                  </div>
+                                  <div style={{flex:1}}>
+                                    <div style={{fontSize:10,color:"rgba(255,255,255,0.4)",marginBottom:2}}>{match.stage} · {fmtDate(match.kickoff)}</div>
+                                    <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                                      <span style={{fontSize:11,color:"#e8f2fb"}}>{tf(match.home)}</span>
+                                      <span style={{fontSize:12,fontWeight:800,color:"#4ade80",background:"rgba(74,222,128,0.1)",border:"1px solid rgba(74,222,128,0.2)",borderRadius:5,padding:"1px 6px"}}>{result.home}:{result.away}</span>
+                                      <span style={{fontSize:11,color:"#e8f2fb"}}>{tf(match.away)}</span>
+                                    </div>
+                                  </div>
+                                  <div style={{textAlign:"right"}}>
+                                    <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",marginBottom:2}}>predicted</div>
+                                    {hasPred
+                                      ? <span style={{fontSize:13,fontWeight:700,color:ptsBadge?.v==="+10"?"#4ade80":ptsBadge?.v==="+5"?"#60a5fa":"rgba(255,255,255,0.4)"}}>{pred.home}:{pred.away}</span>
+                                      : <span style={{fontSize:11,color:"rgba(255,255,255,0.2)"}}>no pred</span>}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                          <div style={{marginTop:10,padding:"10px 14px",background:"rgba(28,118,188,0.08)",border:"1px solid rgba(28,118,188,0.2)",borderRadius:9,display:"flex",justifyContent:"space-between"}}>
+                            <span style={{fontSize:12,color:"rgba(255,255,255,0.4)"}}>Points from {finishedMatches.length} completed matches</span>
+                            <span style={{fontSize:14,fontWeight:800,color:"#a2ceec"}}>{totalPts} pts</span>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
               </div>
             )}
           </div>
