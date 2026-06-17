@@ -340,10 +340,9 @@ const db = {
   // Remove user from leaderboard (delete user + cascade predictions)
   async removeUser(name) {
     await db.query(`users?name=eq.${encodeURIComponent(name)}`, { method: "DELETE", prefer: "return=minimal" });
-  }
-};
+  },
 
-// Load ALL users' predictions (for leaderboard detail view)
+  // Load ALL users' predictions (for leaderboard detail view)
   async loadAllUserPredictions() {
     const rows = await db.query("predictions?select=user_id,match_id,home_score,away_score") || [];
     const map = {};
@@ -356,8 +355,8 @@ const db = {
 
   async loadAllUsers() {
     return await db.query("users?select=id,name") || [];
-  };
-
+  }
+};
 
 const ADMIN_PIN = "wc2026SH";
 
@@ -1452,7 +1451,7 @@ Use exact team names as given. Be precise with scores.`;
               <div style={{textAlign:"center",padding:60,color:"rgba(255,255,255,0.18)",fontSize:12}}>
                 No predictions yet — be the first!
               </div>
-            ) : (
+           ) : lbView==="rankings" ? (
               <div style={{display:"flex",flexDirection:"column",gap:5}}>
                 {leaderboard.map((entry,i)=>{
                   const isMe = userName && entry.name.toLowerCase()===userName.toLowerCase();
@@ -1509,7 +1508,7 @@ Use exact team names as given. Be precise with scores.`;
                   );
                 })}
               </div>
-            )}
+            ) :null}
          {/* ── DETAIL VIEW ── */}
             {lbView==="detail" && (
               <div>
