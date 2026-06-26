@@ -160,7 +160,7 @@ const GROUP_MATCHES = [
 
 const KO_MATCHES = [
   {id:"R32_1",group:"KO",stage:"Round 1 of 32",home:"South Africa",away:"Canada",kickoff:"2026-06-28T19:00:00Z",venue:"SoFi Stadium"},
-  {id:"R32_2",group:"KO",stage:"Round 2 of 32",home:"Brazi",away:"Japan",kickoff:"2026-06-29T19:00:00Z",venue:"NRG Stadium"},
+  {id:"R32_2",group:"KO",stage:"Round 2 of 32",home:"Brazil",away:"Japan",kickoff:"2026-06-29T19:00:00Z",venue:"NRG Stadium"},
   {id:"R32_4",group:"KO",stage:"Round 4 of 32",home:"Netherlands",away:"Morocco",kickoff:"2026-06-30T03:00:00Z",venue:"Estadio BBVA"},
   ...Array.from({length:16},(_,i)=>({id:`R32_${i+1}`,group:"KO",stage:"Round of 32",home:`R32 TBD`,away:`R32 TBD`,kickoff:null})),
   ...Array.from({length:8},(_,i)=>({id:`R16_${i+1}`,group:"KO",stage:"Round of 16",home:`R16 TBD`,away:`R16 TBD`,kickoff:null})),
