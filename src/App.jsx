@@ -159,7 +159,7 @@ const GROUP_MATCHES = [
 ];
 
 const KO_MATCHES = [
-  {id:`R32_1",group:"KO",stage:"Round 1 of 32",home:`South Africa`,away:`Canada`,kickoff:2026-06-28T21:00:00Z",venue:"SoFi Stadium"}
+  {id:"R32_1",group:"KO",stage:"Round 1 of 32",home:`South Africa`,away:`Canada`,kickoff:2026-06-28T21:00:00Z",venue:"SoFi Stadium"},
   ...Array.from({length:16},(_,i)=>({id:`R32_${i+1}`,group:"KO",stage:"Round of 32",home:`R32 TBD`,away:`R32 TBD`,kickoff:null})),
   ...Array.from({length:8},(_,i)=>({id:`R16_${i+1}`,group:"KO",stage:"Round of 16",home:`R16 TBD`,away:`R16 TBD`,kickoff:null})),
   {id:"QF1",group:"KO",stage:"Quarter-Finals",home:"QF TBD",away:"QF TBD",kickoff:"2026-07-09T21:00:00Z"},
