@@ -163,6 +163,7 @@ const KO_MATCHES = [
   {id:"R32_2",group:"KO",stage:"Round 2 of 32",home:"Brazil",away:"Japan",kickoff:"2026-06-29T19:00:00Z",venue:"NRG Stadium"},
   {id:"R32_3",group:"KO",stage:"Round 3 of 32",home:"Germany",away:"TBA",kickoff:"2026-06-29T22:30:00Z",venue:"Gillette Stadium"},
   {id:"R32_4",group:"KO",stage:"Round 4 of 32",home:"Netherlands",away:"Morocco",kickoff:"2026-06-30T03:00:00Z",venue:"Estadio BBVA"},
+   {id:"R32_5",group:"KO",stage:"Round 5 of 32",home:"Ivory Coast",away:"TBA",kickoff:"2026-06-30T19:00:00Z",venue:"AT&T Stadium"},
   ...Array.from({length:16},(_,i)=>({id:`R32_${i+1}`,group:"KO",stage:"Round of 32",home:`R32 TBD`,away:`R32 TBD`,kickoff:null})),
   ...Array.from({length:8},(_,i)=>({id:`R16_${i+1}`,group:"KO",stage:"Round of 16",home:`R16 TBD`,away:`R16 TBD`,kickoff:null})),
   {id:"QF1",group:"KO",stage:"Quarter-Finals",home:"QF TBD",away:"QF TBD",kickoff:"2026-07-09T21:00:00Z"},
