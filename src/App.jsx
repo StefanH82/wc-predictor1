@@ -165,7 +165,7 @@ const KO_MATCHES = [
   {id:"R32_4",group:"KO",stage:"Round 4 of 32",home:"Netherlands",away:"Morocco",kickoff:"2026-06-30T03:00:00Z",venue:"Estadio BBVA"},
   {id:"R32_5",group:"KO",stage:"Round 5 of 32",home:"Ivory Coast",away:"Norway",kickoff:"2026-06-30T19:00:00Z",venue:"AT&T Stadium"},
   {id:"R32_6",group:"KO",stage:"Round 6 of 32",home:"France",away:"Sweden",kickoff:"2026-06-30T23:00:00Z",venue:"MetLife Stadium"},
-  {id:"R32_7",group:"KO",stage:"Round 7 of 32",home:"Mexico",away:"TBA",kickoff:"2026-07-01T03:00:00Z",venue:"Estadio Banorte"},
+  {id:"R32_7",group:"KO",stage:"Round 7 of 32",home:"Mexico",away:"Ecuador",kickoff:"2026-07-01T03:00:00Z",venue:"Estadio Banorte"},
   {id:"R32_8",group:"KO",stage:"Round 7 of 32",home:"TBA",away:"TBA",kickoff:"2026-07-01T18:00:00Z",venue:"Estadio Banorte"},
   ...Array.from({length:16},(_,i)=>({id:`R32_${i+1}`,group:"KO",stage:"Round of 32",home:`R32 TBD`,away:`R32 TBD`,kickoff:null})),
   ...Array.from({length:8},(_,i)=>({id:`R16_${i+1}`,group:"KO",stage:"Round of 16",home:`R16 TBD`,away:`R16 TBD`,kickoff:null})),
