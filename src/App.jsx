@@ -174,7 +174,7 @@ const KO_MATCHES = [
   {id:"R32_13",group:"KO",stage:"Round 13 of 32",home:"Switzerland",away:"Algeria",kickoff:"2026-07-03T05:00:00Z",venue:"Vancouver Stadium"},
   {id:"R32_14",group:"KO",stage:"Round 14 of 32",home:"Australia",away:"Egypt",kickoff:"2026-07-03T20:00:00Z",venue:"Dallas Stadium"},
   {id:"R32_15",group:"KO",stage:"Round 15 of 32",home:"Argentina",away:"Cape Verde",kickoff:"2026-07-04T00:00:00Z",venue:"Miami Stadium"},
-  {id:"R32_16",group:"KO",stage:"Round 16 of 32",home:"Colombia",away:"Ghana",kickoff:"2026-07-03T03:30:00Z",venue:"Kansas Stadium"},
+  {id:"R32_16",group:"KO",stage:"Round 16 of 32",home:"Colombia",away:"Ghana",kickoff:"2026-07-04T03:30:00Z",venue:"Kansas Stadium"},
   {id:"R16_1",group:"KO",stage:"Round 1 of 16",home:"Canada",away:"Morocco",kickoff:"2026-07-04T19:00:00Z",venue:"Houston Stadium"},
   {id:"R16_2",group:"KO",stage:"Round 2 of 16",home:"Paraguay",away:"TBD",kickoff:"2026-07-04T23:00:00Z",venue:"Philadelphia Stadium"},
   {id:"R16_3",group:"KO",stage:"Round 3 of 16",home:"Brazil",away:"Norway",kickoff:"2026-07-05T22:00:00Z",venue:"Houston Stadium"},
