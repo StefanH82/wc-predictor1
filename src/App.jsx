@@ -190,7 +190,7 @@ const KO_MATCHES = [
   {id:"SF1",group:"KO",stage:"Semi-Finals",home:"France",away:"Spain",kickoff:"2026-07-14T21:00:00Z"},
   {id:"SF2",group:"KO",stage:"Semi-Finals",home:"England",away:"Argentina",kickoff:"2026-07-15T21:00:00Z"},
   {id:"3RD",group:"KO",stage:"3rd Place",home:"France",away:"3rd TBD",kickoff:"2026-07-18T22:00:00Z"},
-  {id:"FIN",group:"KO",stage:"🏆 Final",home:"Finalist 1",away:"Finalist 2",kickoff:"2026-07-19T20:00:00Z"},
+  {id:"FIN",group:"KO",stage:"🏆 Final",home:"Spain",away:"Finalist 2",kickoff:"2026-07-19T20:00:00Z"},
 ];
 
 const ALL_MATCHES = [...GROUP_MATCHES, ...KO_MATCHES];
